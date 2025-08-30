@@ -27,5 +27,6 @@ The modular architecture makes it easy to add new services. Here are some ideas 
 - **Historical Data / Sparklines**: Store historical data to be able to show trends over time, possibly with simple text-based sparklines in the `pretty` output format.
 - **More Output Formats**: Add support for other formats like `tsv` or even image-based reports.
 - **Plugin Manager**: A script to help users install and manage modules from a central repository.
+- **Improved Security for Secrets**: Read sensitive data like `GITHUB_TOKEN` from environment variables instead of a plain text configuration file to improve security.
 
 We welcome contributions and ideas for the future of the project. If you have a suggestion, please open an issue on GitHub.
