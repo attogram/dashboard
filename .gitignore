@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+*.[lL][oO][gG]
+*.swo
+*.swp
+
+# IDEs
+.idea/
+.vscode/
+*.suo
+*.user
+*.sln.docstates
+
+# Other
+node_modules/
+
