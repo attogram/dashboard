@@ -77,5 +77,5 @@ esac
 1.  **Use `.sh` Extension**: All module scripts must end with the `.sh` extension (e.g., `mynewservice.sh`).
 2.  **Make it Executable**: `chmod +x modules/mynewservice.sh`
 3.  **Handle All 8 Formats**: Your module must correctly format its output for `plain`, `pretty`, `json`, `xml`, `html`, `yaml`, `csv`, and `markdown`.
-3.  **Be Robust**: Handle potential errors gracefully (e.g., API failures, missing configuration).
-4.  **Be Self-Contained**: Do not introduce new system-level dependencies.
+4.  **Be Robust**: Handle potential errors gracefully (e.g., API failures, missing configuration).
+5.  **Be Self-Contained**: Do not introduce new system-level dependencies.
