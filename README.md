@@ -9,7 +9,7 @@
 
 # Dashboard
 
-![Dashboard Logo](./docs/logos/logo.160.80.png)
+![Dashboard Logo](./docs/logos/logo.320.160.png)
 
 **A personal metrics dashboard for open-source creators, right in your terminal.**
 
