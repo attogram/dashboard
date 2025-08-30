@@ -1,17 +1,26 @@
-# Documentation
+# Dashboard Documentation
 
-This directory contains the documentation for the `base` project.
+Welcome to the full documentation for the Dashboard project.
 
-- **[The `base` Philosophy](./base.md)**: An overview of the core principles and goals behind this template repository.
-- **[Docker-based Development Environment](./docker.md)**: Instructions on how to use the included Docker setup for a consistent development environment.
-- **[GitHub Codespaces](./github-codespaces.md)**: A guide to using GitHub Codespaces for a cloud-based development experience.
-- **[GitHub Pages Site](./github-pages.md)**: Information on how the project's documentation is automatically built and deployed as a website.
-- **[Use Case: A Publishing Platform](./use-case-publishing.md)**: A detailed guide on using this repository as a platform to create and publish your own website.
-- **[GitHub Workflows](./github-workflows.md)**: An explanation of the CI/CD workflows for linting, testing, and releasing.
-- **[Licensing Information](./licensing.md)**: Details on the MIT License and how to properly attribute copyright.
-- **[Deploying to Render.com](./render.md)**: Instructions for deploying the project to the Render.com platform.
-- **[Merging `base` Into an Existing Repository](./merging-base.md)**: A guide on how to incorporate `base` into an existing project.
-- **[Standard Repository Files](./standard-files.md)**: An explanation of the standard configuration files like `.gitignore`, `.editorconfig`, and `.gitattributes`.
-- **[Using Prettier](./prettier.md)**: A guide to installing and using Prettier for code formatting.
-- **[Repository Badges](./badges.md)**: An explanation of how to use and create repository badges.
-- **[Maintaining `base` as a Template Repository](./template-repo.md)**: A guide for maintainers of this template, outlining best practices and administrative steps.
+## Core Concepts
+
+- **[Architecture](./dashboard-architecture.md)**: An overview of the modular architecture and how the components work together.
+- **[Main Script (`dashboard.sh`)](./dashboard-script.md)**: A detailed guide to the main runner script and its features.
+- **[Configuration](./dashboard-configuration.md)**: A comprehensive guide to all the settings in the `config.sh` file.
+- **[Output Formats](./dashboard-output-formats.md)**: A reference for all supported output formats with examples.
+
+## Development
+
+- **[Installation](./dashboard-install.md)**: Step-by-step installation instructions.
+- **[Modules](./dashboard-modules.md)**: A guide to how modules work and how to create new ones.
+- **[Testing](./dashboard-testing.md)**: Information on the BATS testing framework and how to run the test suite.
+
+## Modules
+
+- **[Discord](./dashboard-discord.md)**: Documentation for the Discord module.
+- **[GitHub Sponsors](./dashboard-sponsors.md)**: Documentation for the GitHub Sponsors module.
+
+## Project
+
+- **[Future Plans](./dashboard-future-plans.md)**: A look at the roadmap and planned features for the project.
+- **[GitHub Pages](./github-pages.md)**: Information on how this documentation is published as a website.

@@ -21,3 +21,5 @@ ehthumbs_vista.db
 # Other
 node_modules/
 
+# dashboard
+config.sh
