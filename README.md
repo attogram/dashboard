@@ -1,3 +1,12 @@
+[![Run Tests](https://github.com/attogram/dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/attogram/dashboard/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/attogram/dashboard?style=flat)](https://github.com/attogram/dashboard/releases)
+[![GitHub stars](https://img.shields.io/github/stars/attogram/dashboard?style=flat)](https://github.com/attogram/dashboard/stargazers)
+[![GitHub watchers](https://img.shields.io/github/watchers/attogram/dashboard?style=flat)](https://github.com/attogram/dashboard/watchers)
+[![Forks](https://img.shields.io/github/forks/attogram/dashboard?style=flat)](https://github.com/attogram/dashboard/forks)
+[![Issues](https://img.shields.io/github/issues/attogram/dashboard?style=flat)](https://github.com/attogram/dashboard/issues)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/t/attogram/dashboard?style=flat)](https://github.com/attogram/dashboard/commits/main/)
+[![License](https://img.shields.io/github/license/attogram/dashboard?style=flat)](./LICENSE)
+
 # Dashboard
 
 ![Dashboard Logo](./docs/logos/logo.svg)
