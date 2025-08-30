@@ -10,12 +10,12 @@ The `dashboard.sh` script is the main entry point for the application. It serves
 
 ### Options
 
--   `-f, --format <format>`: Specify the output format. See [Output Formats](./dashboard-output-formats.md) for a full list of supported formats. If not provided, the default is `plain`.
--   `-h, --help`: Display a help message with usage information and exit.
+- `-f, --format <format>`: Specify the output format. See [Output Formats](./dashboard-output-formats.md) for a full list of supported formats. If not provided, the default is `plain`.
+- `-h, --help`: Display a help message with usage information and exit.
 
 ### Arguments
 
--   `[module]`: (Optional) The name of a single module to run (e.g., `github`, `hackernews`). If a module name is provided, only that module's report will be generated. If omitted, the script will run all executable modules found in the `modules/` directory.
+- `[module]`: (Optional) The name of a single module to run (e.g., `github`, `hackernews`). If a module name is provided, only that module's report will be generated. If omitted, the script will run all executable modules found in the `modules/` directory.
 
 ## Execution Flow
 

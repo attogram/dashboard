@@ -27,12 +27,14 @@ Dashboard is a modular, configurable, and robust Bash script that provides a con
 ### Installation
 
 1.  Clone this repository:
+
     ```bash
     git clone https://github.com/attogram/dashboard.git
     cd dashboard
     ```
 
 2.  Create your configuration file by copying the template:
+
     ```bash
     cp config.dist.sh config.sh
     ```
@@ -42,17 +44,20 @@ Dashboard is a modular, configurable, and robust Bash script that provides a con
 ### Usage
 
 To run a full report in the default `plain` format:
+
 ```bash
 ./dashboard.sh
 ```
 
 To specify an output format, use the `-f` or `--format` flag:
+
 ```bash
 ./dashboard.sh --format pretty
 ./dashboard.sh -f json
 ```
 
 To run only a specific module:
+
 ```bash
 ./dashboard.sh github
 ./dashboard.sh --format html hackernews

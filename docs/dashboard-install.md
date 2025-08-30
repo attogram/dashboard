@@ -6,18 +6,20 @@ This guide provides step-by-step instructions for installing the Dashboard scrip
 
 Before you begin, ensure you have the following command-line tools installed on your system:
 
--   **Bash**: Version 3.2 or higher. You can check your version with `bash --version`.
--   **Git**: For cloning the repository.
--   **curl**: For making HTTP requests to the various APIs.
--   **jq**: For parsing JSON data from the APIs.
+- **Bash**: Version 3.2 or higher. You can check your version with `bash --version`.
+- **Git**: For cloning the repository.
+- **curl**: For making HTTP requests to the various APIs.
+- **jq**: For parsing JSON data from the APIs.
 
 On most Linux systems, you can install these with your package manager. For example, on Debian/Ubuntu:
+
 ```bash
 sudo apt-get update
 sudo apt-get install -y bash git curl jq
 ```
 
 On macOS, these tools are typically pre-installed. You can install `jq` with Homebrew:
+
 ```bash
 brew install jq
 ```

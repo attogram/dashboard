@@ -33,10 +33,11 @@ Karma: 20
 A single, well-formed JSON object containing all the metrics. The output from a single module is a fragment that is assembled into a larger object by the main script.
 
 ```json
-{"karma":20}
+{ "karma": 20 }
 ```
 
 When run as a full report, the output looks like this:
+
 ```json
 {
   "github": {
@@ -65,7 +66,10 @@ A single, well-formed XML document containing all the metrics.
 A self-contained HTML document for viewing in a web browser.
 
 ```html
-<h2>Hacker News</h2><ul><li>Karma: 20</li></ul>
+<h2>Hacker News</h2>
+<ul>
+  <li>Karma: 20</li>
+</ul>
 ```
 
 ---
@@ -97,5 +101,6 @@ A GitHub-flavored Markdown document.
 
 ```markdown
 ### Hacker News
+
 - Karma: 20
 ```
