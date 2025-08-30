@@ -96,13 +96,26 @@ fi
 MODULES_DIR="${SCRIPT_DIR}/modules"
 MODULES_TO_RUN=()
 if [ -n "$MODULE_TO_RUN" ]; then
+    # If the user provides 'github', check for 'github.sh'
+    if [[ ! "$MODULE_TO_RUN" == *.sh ]]; then
+        MODULE_TO_RUN="${MODULE_TO_RUN}.sh"
+    fi
     MODULE_PATH="${MODULES_DIR}/${MODULE_TO_RUN}"
     if [ ! -x "$MODULE_PATH" ]; then
-        echo "Error: Module '${MODULE_TO_RUN}' not found or not executable."
-        exit 1
+        # If 'github.sh' is not found, try without the extension for backward compatibility
+        MODULE_TO_RUN_NO_EXT="${MODULE_TO_RUN%.sh}"
+        MODULE_PATH_NO_EXT="${MODULES_DIR}/${MODULE_TO_RUN_NO_EXT}"
+        if [ -x "$MODULE_PATH_NO_EXT" ]; then
+            MODULE_PATH="$MODULE_PATH_NO_EXT"
+            MODULE_TO_RUN="$MODULE_TO_RUN_NO_EXT"
+        else
+            echo "Error: Module '${MODULE_TO_RUN}' not found or not executable."
+            exit 1
+        fi
     fi
     MODULES_TO_RUN+=("$MODULE_TO_RUN")
 else
+    # Find all executable files in the modules directory, with or without .sh
     for module in "${MODULES_DIR}"/*; do
         if [ -x "$module" ]; then
             MODULES_TO_RUN+=("$(basename "$module")")
