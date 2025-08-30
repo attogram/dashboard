@@ -17,7 +17,6 @@ Welcome to the full documentation for the Dashboard project.
 
 ## Modules
 
-- **[Discord](./dashboard-discord.md)**: Documentation for the Discord module.
 - **[GitHub Sponsors](./dashboard-sponsors.md)**: Documentation for the GitHub Sponsors module.
 
 ## Project

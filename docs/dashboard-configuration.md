@@ -26,12 +26,6 @@ These are the primary variables you will need to set to use the dashboard.
 - **Used by**: `github` module.
 - **Example**: `REPOS=("my-cool-project" "another-repo")`
 
-### `DISCORD_SERVER_ID`
-
-- **Description**: (Optional) The ID of your Discord server for tracking online members. The server must have the public widget enabled.
-- **Used by**: `discord` module.
-- **Example**: `DISCORD_SERVER_ID="123456789012345678"`
-
 ## Advanced Configuration
 
 These variables are for modules that require more sensitive information, like API tokens.
