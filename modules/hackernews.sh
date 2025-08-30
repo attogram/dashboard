@@ -8,6 +8,8 @@
 # Usage: ./modules/hackernews <format>
 #
 
+#echo 'modules/hackernews.sh started'
+
 # --- Configuration and Setup ------------------------------------------------
 
 # Set script directory to find config.sh

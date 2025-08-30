@@ -8,6 +8,8 @@
 # Usage: ./modules/github-sponsors <format>
 #
 
+#echo 'modules/github-sponsors.sh started'
+
 # --- Configuration and Setup ------------------------------------------------
 
 # Set script directory to find config.sh

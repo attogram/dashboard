@@ -11,19 +11,36 @@
 #   -h, --help             Display this help message
 #
 
-# --- Configuration and Setup ------------------------------------------------
+DASHBOARD_NAME='dashboard'
+DASHBOARD_VERSION='0.0.2'
+DASHBOARD_URL='https://github.com/attogram/dashboard'
+DASHBOARD_DISCORD='https://discord.gg/BGQJCbYVBa'
+DASHBOARD_LICENSE='MIT'
+DASHBOARD_COPYRIGHT='Copyright (c) 2025 Attogram Project <https://github.com/attogram>'
+DASHBOARD_DEBUG=0 # 0 = off, 1 = on
 
-# Set script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Default format and module
 FORMAT="plain"
 MODULE_TO_RUN=""
 VALID_FORMATS=("plain" "pretty" "json" "xml" "html" "yaml" "csv" "markdown")
 
-# --- Functions --------------------------------------------------------------
+_debug() {
+  (( DASHBOARD_DEBUG )) || return 0
+  printf '[DEBUG] %s: %s\n' "$(date '+%H:%M:%S')" "$1" >&2
+}
 
-# Display usage information
+_message() {
+  printf '%s\n' "$1"
+}
+
+_warn() {
+  printf '[WARNING] %s\n' "$1" >&2
+}
+
+_error() {
+  printf '[ERROR] %s\n' "$1" >&2
+}
+
 usage() {
     echo "Usage: $(basename "$0") [options] [module]"
     echo "Options:"
@@ -34,65 +51,64 @@ usage() {
     echo "If a module name (e.g., 'github') is provided, only that module will be run."
 }
 
-# --- Argument Parsing -------------------------------------------------------
+_debug "$DASHBOARD_NAME v$DASHBOARD_VERSION"
 
-# Parse command-line arguments
+_debug 'parsing command-line arguments'
+
 while [[ $# -gt 0 ]]; do
     key="$1"
     case $key in
         -f|--format)
-        FORMAT="$2"
-        shift 2
-        ;;
+            FORMAT="$2"
+            shift 2
+            ;;
         -h|--help)
-        usage
-        exit 0
-        ;;
-        *)
-        if [[ -z "$MODULE_TO_RUN" ]] && [[ ! "$key" == -* ]]; then
-            MODULE_TO_RUN="$key"
-            shift
-        else
-            echo "Unknown option: $1"
             usage
-            exit 1
-        fi
-        ;;
+            exit 0
+            ;;
+        *)
+            if [[ -z "$MODULE_TO_RUN" ]] && [[ ! "$key" == -* ]]; then
+                MODULE_TO_RUN="$key"
+                shift
+            else
+                _error "Unknown option: $1"
+                usage
+                exit 1
+            fi
+            ;;
     esac
 done
 
-# Validate format
+_debug 'Validate format'
 if ! [[ " ${VALID_FORMATS[*]} " =~ " ${FORMAT} " ]]; then
-    echo "Error: Invalid format '${FORMAT}'."
+    _error "Error: Invalid format '${FORMAT}'."
     usage
     exit 1
 fi
 
-# --- Initialization ---------------------------------------------------------
 
-# Load configuration
+_debug 'Load configuration'
 if [ -f "${SCRIPT_DIR}/config.sh" ]; then
     # shellcheck source=config.sh
     source "${SCRIPT_DIR}/config.sh"
 else
-    echo "Error: Configuration file not found."
-    echo "Please copy config.dist.sh to config.sh and customize it."
+    _error "Error: Configuration file not found."
+    _error "Please copy config.dist.sh to config.sh and customize it."
     exit 1
 fi
 
-# Check for dependencies
+_debug 'Check for dependencies'
 if ! command -v curl &> /dev/null; then
-    echo "Error: 'curl' is not installed or not in your PATH."
+    _error "Error: 'curl' is not installed or not in your PATH."
     exit 1
 fi
 if ! command -v jq &> /dev/null; then
-    echo "Error: 'jq' is not installed or not in your PATH."
+    _error "Error: 'jq' is not installed or not in your PATH."
     exit 1
 fi
 
-# --- Main Logic -------------------------------------------------------------
 
-# Get list of modules to run
+_debug 'Get list of modules to run'
 MODULES_DIR="${SCRIPT_DIR}/modules"
 MODULES_TO_RUN=()
 if [ -n "$MODULE_TO_RUN" ]; then
@@ -109,7 +125,7 @@ if [ -n "$MODULE_TO_RUN" ]; then
             MODULE_PATH="$MODULE_PATH_NO_EXT"
             MODULE_TO_RUN="$MODULE_TO_RUN_NO_EXT"
         else
-            echo "Error: Module '${MODULE_TO_RUN}' not found or not executable."
+            _error "Error: Module '${MODULE_TO_RUN}' not found or not executable."
             exit 1
         fi
     fi
@@ -123,18 +139,21 @@ else
     done
 fi
 
-# --- Report Generation ------------------------------------------------------
+_debug "MODULES_TO_RUN: ${MODULES_TO_RUN[*]}"
 
-# Collect output from all modules
+_debug 'Collect output from all modules'
 OUTPUTS=()
 for module_name in "${MODULES_TO_RUN[@]}"; do
+    _debug "Calling $module_name"
     module_output=$("$MODULES_DIR/$module_name" "$FORMAT")
     if [ -n "$module_output" ]; then
+        _debug "Saving output from $module_name: $(echo "$module_output" | wc -c | tr -d ' ') bytes"
         OUTPUTS+=("$module_output")
     fi
 done
 
-# Assemble the final report
+_debug "Assemble the final report: FORMAT: $FORMAT"
+
 case "$FORMAT" in
     json)
         echo "{"
@@ -160,3 +179,5 @@ case "$FORMAT" in
         printf '%s\n' "${OUTPUTS[@]}"
         ;;
 esac
+
+_debug 'Done.'

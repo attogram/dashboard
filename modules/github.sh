@@ -10,29 +10,37 @@
 
 # --- Configuration and Setup ------------------------------------------------
 
+
+#echo 'github.sh started'
+
 # Set script directory to find config.sh
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${SCRIPT_DIR}/../config.sh"
+
+#echo "github.sh Loading CONFIG_FILE: $CONFIG_FILE"
 
 # Load configuration
 if [ -f "$CONFIG_FILE" ]; then
     # shellcheck source=../config.sh
     source "$CONFIG_FILE"
 else
-    echo "Error: Configuration file not found at $CONFIG_FILE" >&2
+    echo "github.sh Error: Configuration file not found at $CONFIG_FILE" >&2
     exit 1
 fi
 
 # Check for required configuration
 if [ -z "$GITHUB_USER" ]; then
-    echo "Error: GITHUB_USER is not set in config.sh" >&2
+    echo "github.sh Error: GITHUB_USER is not set in config.sh" >&2
     exit 1
 fi
+#echo "github.sh GITHUB_USER: $GITHUB_USER"
+
 if [ ${#REPOS[@]} -eq 0 ]; then
     # This module is optional if no repos are specified.
     # Exit gracefully without an error.
     exit 0
 fi
+#echo "github.sh REPOS: ${REPOS[*]}"
 
 # --- Input ------------------------------------------------------------------
 
@@ -51,7 +59,11 @@ fetch_repo_data() {
     local api_url="https://api.github.com/repos/${GITHUB_USER}/${repo_name}"
     local api_response
 
+    #echo "github.sh: repo_name: $repo_name format: $format api_url: $api_url"
+
     api_response=$(curl -s "$api_url")
+
+    #echo "github.sh: api_response: $api_response"
 
     if [ $? -ne 0 ]; then
         echo "Error: curl command failed for repo ${repo_name}" >&2
@@ -60,7 +72,7 @@ fetch_repo_data() {
 
     # Check for not found message
     if echo "$api_response" | jq -e '.message == "Not Found"' > /dev/null; then
-        echo "Error: Repository '${GITHUB_USER}/${repo_name}' not found." >&2
+        echo "github.sh Error: Repository '${GITHUB_USER}/${repo_name}' not found." >&2
         return
     fi
 
