@@ -11,6 +11,9 @@ GITHUB_USER="your_username_here"
 # A space-separated list of your key GitHub repositories to track.
 REPOS=("your-repo-1" "your-repo-2")
 
+# (Optional) Your Discord Server ID for tracking online members.
+DISCORD_SERVER_ID=""
+
 # --------------------------------------------------
 # Optional & Advanced Configuration
 # --------------------------------------------------

@@ -11,6 +11,8 @@ setup() {
   sed -i 's/REPOS=(.*)/REPOS=("base" "2048-lite")/' config.sh
   # Ensure GITHUB_TOKEN is empty so the sponsors module is skipped
   sed -i 's/GITHUB_TOKEN=".*"/GITHUB_TOKEN=""/' config.sh
+  # Add the discord server ID for testing
+  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID="1400382194509287426"/' config.sh
 }
 
 @test "dashboard.sh should be executable" {

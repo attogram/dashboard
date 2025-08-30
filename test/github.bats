@@ -43,8 +43,7 @@ setup() {
   echo "$output" | grep -q -E '<github>'
   echo "$output" | grep -q -E '<base>'
   echo "$output" | grep -q -E '<stars>'
-  # Note: This will fail due to the invalid tag name. I will fix this later.
-  # echo "$output" | grep -q -E '<2048-lite>'
+  echo "$output" | grep -q -E '<_2048_lite>'
 }
 
 @test "github module (html)" {

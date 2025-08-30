@@ -93,7 +93,8 @@ fetch_repo_data() {
             echo "\"${repo_name}\":{\"stars\":${stars},\"forks\":${forks},\"issues\":${issues},\"watchers\":${watchers}}"
             ;;
         xml)
-            echo "<${repo_name}><stars>${stars}</stars><forks>${forks}</forks><issues>${issues}</issues><watchers>${watchers}</watchers></${repo_name}>"
+            xml_repo_name=$(echo "$repo_name" | sed 's/-/_/g' | sed 's/^[0-9]/_&/')
+            echo "<${xml_repo_name}><stars>${stars}</stars><forks>${forks}</forks><issues>${issues}</issues><watchers>${watchers}</watchers></${xml_repo_name}>"
             ;;
         html)
             echo "<h3>${repo_name}</h3><ul><li>Stars: ${stars}</li><li>Forks: ${forks}</li><li>Open Issues: ${issues}</li><li>Watchers: ${watchers}</li></ul>"
