@@ -58,10 +58,16 @@ fetch_repo_data() {
     local format=$2
     local api_url="https://api.github.com/repos/${GITHUB_USER}/${repo_name}"
     local api_response
+    local curl_headers=()
+
+    # Add GitHub token to headers if available
+    if [ -n "$GITHUB_TOKEN" ]; then
+        curl_headers+=(-H "Authorization: token ${GITHUB_TOKEN}")
+    fi
 
     #echo "github.sh: repo_name: $repo_name format: $format api_url: $api_url"
 
-    api_response=$(curl -s "$api_url")
+    api_response=$(curl -s "${curl_headers[@]}" "$api_url")
 
     #echo "github.sh: api_response: $api_response"
 

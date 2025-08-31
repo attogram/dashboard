@@ -79,3 +79,7 @@ esac
 3.  **Handle All 8 Formats**: Your module must correctly format its output for `plain`, `pretty`, `json`, `xml`, `html`, `yaml`, `csv`, and `markdown`.
 4.  **Be Robust**: Handle potential errors gracefully (e.g., API failures, missing configuration).
 5.  **Be Self-Contained**: Do not introduce new system-level dependencies.
+
+### GitHub Module (`modules/github.sh`)
+
+The `github` module fetches statistics for specified repositories. To ensure it works reliably, you should provide a GitHub Personal Access Token (PAT) via the `GITHUB_TOKEN` variable in your `config.sh` file. This helps to avoid the strict rate limits imposed by the GitHub API on unauthenticated requests.
