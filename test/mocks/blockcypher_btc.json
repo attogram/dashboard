@@ -1,0 +1,11 @@
+{
+  "address": "test_btc_address",
+  "total_received": 100000000,
+  "total_sent": 50000000,
+  "balance": 50000000,
+  "unconfirmed_balance": 0,
+  "final_balance": 50000000,
+  "n_tx": 2,
+  "unconfirmed_n_tx": 0,
+  "final_n_tx": 2
+}

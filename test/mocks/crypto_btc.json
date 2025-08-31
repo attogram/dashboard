@@ -1,0 +1,13 @@
+{
+  "data": {
+    "items": [
+      {
+        "contract_name": "Bitcoin",
+        "contract_ticker_symbol": "BTC",
+        "balance": "50000000",
+        "contract_decimals": 8
+      }
+    ]
+  },
+  "error": null
+}
