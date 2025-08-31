@@ -1,0 +1,19 @@
+{
+  "data": {
+    "items": [
+      {
+        "contract_name": "Ethereum",
+        "contract_ticker_symbol": "ETH",
+        "balance": "1234500000000000000",
+        "contract_decimals": 18
+      },
+      {
+        "contract_name": "USD Coin",
+        "contract_ticker_symbol": "USDC",
+        "balance": "50123456",
+        "contract_decimals": 6
+      }
+    ]
+  },
+  "error": null
+}
