@@ -3,16 +3,16 @@
 # --------------------------------------------------
 
 # Your Hacker News username
-HN_USER="your_username_here"
+HN_USER='your_username_here'
 
 # Your GitHub username
-GITHUB_USER="your_username_here"
+GITHUB_USER='your_username_here'
 
 # A space-separated list of your key GitHub repositories to track.
-REPOS=("your-repo-1" "your-repo-2")
+REPOS=('your-repo-1' 'your-repo-2')
 
 # (Optional) Your Discord Server ID for tracking online members.
-DISCORD_SERVER_ID=""
+DISCORD_SERVER_ID=''
 
 # --------------------------------------------------
 # Optional & Advanced Configuration
@@ -23,7 +23,7 @@ DISCORD_SERVER_ID=""
 # Required for the 'github-sponsors' module.
 # Create a token here: https://github.com/settings/tokens/new
 # The token needs the 'read:user' scope.
-GITHUB_TOKEN=""
+GITHUB_TOKEN=''
 
 # --------------------------------------------------
 # Crypto Donations Module
@@ -33,12 +33,12 @@ GITHUB_TOKEN=""
 
 # (Optional) Your Covalent API Key. Required for the "covalent" provider.
 # Get a key from: https://www.covalenthq.com/platform/
-COVALENT_API_KEY=""
+COVALENT_API_KEY=''
 
 # (Optional) Your BlockCypher API Token. Not required for balance checks,
 # but can be used to get higher rate limits.
 # Get a token from: https://accounts.blockcypher.com/
-BLOCKCYPHER_TOKEN=""
+BLOCKCYPHER_TOKEN=''
 
 
 # --- Provider Configuration ---
@@ -61,11 +61,11 @@ BLOCKCYPHER_TOKEN=""
 # Add the wallet addresses you want to track below.
 # The script will fetch balances for any variable starting with CRYPTO_WALLET_
 #
-# Format: CRYPTO_WALLET_<TICKER>="your_address"
+# Format: CRYPTO_WALLET_<TICKER>='your_address'
 
-CRYPTO_WALLET_BTC="your_bitcoin_address"
-CRYPTO_WALLET_ETH="your_ethereum_address"
-#CRYPTO_WALLET_LTC="your_litecoin_address"
+CRYPTO_WALLET_BTC='your_bitcoin_address'
+CRYPTO_WALLET_ETH='your_ethereum_address'
+#CRYPTO_WALLET_LTC='your_litecoin_address'
 #CRYPTO_WALLET_DOGE="your_dogecoin_address"
 #CRYPTO_WALLET_DASH="your_dash_address"
 #CRYPTO_WALLET_MATIC="your_polygon_address"

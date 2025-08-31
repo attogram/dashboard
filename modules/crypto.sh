@@ -33,7 +33,7 @@ format_balance() {
     fi
     local frac_part int_part
     if [ "$len" -le "$decimals" ]; then
-        int_part="0"
+        int_part='0'
         frac_part=$(printf "%0*d" "$decimals" "$balance_raw")
     else
         int_part="${balance_raw:0:$((len - decimals))}"
@@ -55,8 +55,8 @@ get_provider() {
         echo "${!provider_var}"
     else
         case "$ticker" in
-            BTC|ETH|LTC|DOGE|DASH) echo "blockcypher" ;;
-            *) echo "covalent" ;;
+            BTC|ETH|LTC|DOGE|DASH) echo 'blockcypher' ;;
+            *) echo 'covalent' ;;
         esac
     fi
 }
@@ -79,11 +79,11 @@ fetch_from_blockcypher() {
     local address=$2
     local chain_map
     case "$ticker" in
-        BTC) chain_map="btc/main" ;;
-        ETH) chain_map="eth/main" ;;
-        LTC) chain_map="ltc/main" ;;
-        DOGE) chain_map="doge/main" ;;
-        DASH) chain_map="dash/main" ;;
+        BTC) chain_map='btc/main' ;;
+        ETH) chain_map='eth/main' ;;
+        LTC) chain_map='ltc/main' ;;
+        DOGE) chain_map='doge/main' ;;
+        DASH) chain_map='dash/main' ;;
         *) return 1 ;;
     esac
     local api_url="https://api.blockcypher.com/v1/${chain_map}/addrs/${address}/balance"
@@ -109,9 +109,9 @@ fetch_from_covalent() {
     if [ -z "$COVALENT_API_KEY" ]; then return 1; fi
     local chain_name
     case "$ticker" in
-        ETH) chain_name="eth-mainnet" ;;
-        MATIC) chain_name="matic-mainnet" ;;
-        AVAX) chain_name="avalanche-mainnet" ;;
+        ETH) chain_name='eth-mainnet' ;;
+        MATIC) chain_name='matic-mainnet' ;;
+        AVAX) chain_name='avalanche-mainnet' ;;
         *) return 1 ;;
     esac
     local api_url="https://api.covalenthq.com/v1/${chain_name}/address/${address}/balances_v2/?key=${COVALENT_API_KEY}"
@@ -139,13 +139,13 @@ fetch_from_covalent() {
 WALLET_VARS=$(env | grep "^CRYPTO_WALLET_")
 if [ -z "$WALLET_VARS" ]; then exit 0; fi
 
-ALL_BALANCES_JSON="[]"
+ALL_BALANCES_JSON='[]'
 while IFS= read -r line; do
     VAR_NAME=$(echo "$line" | cut -d'=' -f1)
     ADDRESS=$(echo "$line" | cut -d'=' -f2- | tr -d '"')
     TICKER=$(echo "$VAR_NAME" | sed 's/CRYPTO_WALLET_//')
     PROVIDER=$(get_provider "$TICKER")
-    wallet_json=""
+    wallet_json=''
     case "$PROVIDER" in
         local)
             if [ "$TICKER" = "BTC" ]; then
@@ -172,33 +172,33 @@ DATA=$ALL_BALANCES_JSON
 # --- Output Formatting ---
 case "$FORMAT" in
     plain | pretty)
-        echo "Crypto Donations"
+        echo 'Crypto Donations'
         echo "$DATA" | jq -r '.[] | "\(.chain) (\(.address))\n" + (.tokens[] | "  - \(.symbol): \(.balance)")'
         ;;
     json)
         echo "\"crypto\":${DATA}"
         ;;
     xml)
-        echo "<crypto>"
+        echo '<crypto>'
         echo "$DATA" | jq -r '.[] | "  <wallet chain=\"\(.chain)\" address=\"\(.address)\">\n" + (.tokens[] | "    <token symbol=\"\(.symbol)\" balance=\"\(.balance)\"/>") + "\n  </wallet>"'
-        echo "</crypto>"
+        echo '</crypto>'
         ;;
     html)
-        echo "<h2>Crypto Donations</h2>"
-        echo "<ul>"
+        echo '<h2>Crypto Donations</h2>'
+        echo '<ul>'
         echo "$DATA" | jq -r '.[] | "  <li><b>\(.chain)</b> (<code>\(.address)</code>)<ul>" + (.tokens[] | "<li>\(.symbol): \(.balance)</li>") + "</ul></li>"'
-        echo "</ul>"
+        echo '</ul>'
         ;;
     yaml)
-        echo "crypto:"
+        echo 'crypto:'
         echo "$DATA" | jq -r '.[] | "  - chain: \(.chain)\n    address: \(.address)\n    tokens:\n" + (.tokens[] | "      - symbol: \(.symbol)\n        balance: \"\(.balance)\"")'
         ;;
     csv)
-        echo "module,chain,address,token_symbol,balance"
+        echo 'module,chain,address,token_symbol,balance'
         echo "$DATA" | jq -r '.[] | . as $parent | .tokens[] | "crypto,\($parent.chain),\($parent.address),\(.symbol),\(.balance)"'
         ;;
     markdown)
-        echo "### Crypto Donations"
+        echo '### Crypto Donations'
         echo "$DATA" | jq -r '.[] | "*   **\(.chain)** (`\(.address)`)\n" + (.tokens[] | "    *   **\(.symbol)**: \(.balance)")'
         ;;
     *)
