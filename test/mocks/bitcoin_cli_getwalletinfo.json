@@ -1,0 +1,14 @@
+{
+  "walletname": "my_local_wallet",
+  "walletversion": 169900,
+  "balance": 1.23,
+  "unconfirmed_balance": 0.0,
+  "immature_balance": 0.0,
+  "txcount": 10,
+  "keypoololdest": 1609459200,
+  "keypoolsize": 1000,
+  "keypoolsize_hd_internal": 1000,
+  "paytxfee": 0.0,
+  "private_keys_enabled": true,
+  "avoid_reuse": false
+}

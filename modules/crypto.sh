@@ -18,13 +18,6 @@ if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
 fi
 
-# Check for required config variables
-if [ -z "$GOLDRUSH_API_KEY" ]; then
-    # Exit gracefully if the API key is not configured.
-    # This module is optional.
-    exit 0
-fi
-
 # --- Input ---
 
 FORMAT="$1"
@@ -35,27 +28,8 @@ fi
 
 # --- Data Fetching ---
 
-# Function to map our simple tickers to the official GoldRush chain names
-get_chain_name() {
-    local ticker
-    ticker=$(echo "$1" | tr '[:lower:]' '[:upper:]')
-    case "$ticker" in
-        BTC) echo "bitcoin" ;;
-        ETH) echo "eth-mainnet" ;;
-        MATIC) echo "matic-mainnet" ;;
-        SOL) echo "solana-mainnet" ;;
-        AVAX) echo "avalanche-mainnet" ;;
-        ARB) echo "arbitrum-mainnet" ;;
-        OP) echo "optimism-mainnet" ;;
-        BASE) echo "base-mainnet" ;;
-        FTM) echo "fantom-mainnet" ;;
-        BNB) echo "bsc-mainnet" ;;
-        *) echo "" ;;
-    esac
-}
-
-# Function to format the raw balance string using the decimals value,
-# since we don't have `bc` for floating point math.
+# Function to format a raw balance string using its decimals value.
+# This is needed as we don't have `bc` for floating point math.
 format_balance() {
     local balance_raw="$1"
     local decimals="$2"
@@ -64,27 +38,20 @@ format_balance() {
     # Remove trailing zeros from fractional part later
     shopt -s extglob
 
-    # If no decimals, it's a whole number
     if [ "$decimals" -eq 0 ]; then
         echo "$balance_raw"
         return
     fi
 
-    local frac_part
-    local int_part
-
-    if [ "$len" -le "$decimals" ];
-    then
-        # It's a purely fractional number, pad with zeros
+    local frac_part int_part
+    if [ "$len" -le "$decimals" ]; then
         int_part="0"
         frac_part=$(printf "%0*d" "$decimals" "$balance_raw")
     else
-        # It's a mixed number
         int_part="${balance_raw:0:$((len - decimals))}"
         frac_part="${balance_raw:$((len - decimals))}"
     fi
 
-    # Trim trailing zeros from the fractional part
     frac_part="${frac_part%%*(0)}"
     if [ -z "$frac_part" ]; then
         echo "$int_part"
@@ -93,61 +60,155 @@ format_balance() {
     fi
 }
 
-# Find all crypto wallet variables defined in the config
+# Determines the provider for a given ticker, falling back to defaults.
+get_provider() {
+    local ticker=$1
+    local provider_var="CRYPTO_${ticker}_PROVIDER"
+
+    if [ -n "${!provider_var}" ]; then
+        echo "${!provider_var}"
+    else
+        # Fallback logic: BlockCypher for its chains, otherwise Covalent
+        case "$ticker" in
+            BTC|ETH|LTC|DOGE|DASH) echo "blockcypher" ;;
+            *) echo "covalent" ;;
+        esac
+    fi
+}
+
+# --- Provider Implementations ---
+
+# Fetches BTC balance from a local node
+fetch_from_local_btc() {
+    if ! command -v bitcoin-cli &> /dev/null; then return 1; fi
+
+    local btc_info wallet_name balance display_name
+    btc_info=$(bitcoin-cli getwalletinfo 2>/dev/null)
+    if [ $? -ne 0 ]; then return 1; fi
+
+    wallet_name=$(echo "$btc_info" | jq -r '.walletname')
+    balance=$(echo "$btc_info" | jq -r '.balance')
+    display_name="local node ($wallet_name)"
+
+    echo "{\"chain\":\"BTC\",\"address\":\"${display_name}\",\"tokens\":[{\"symbol\":\"BTC\",\"balance\":\"${balance}\"}]}"
+}
+
+# Fetches balances from BlockCypher API
+fetch_from_blockcypher() {
+    local ticker=$1
+    local address=$2
+    local chain_map
+
+    case "$ticker" in
+        BTC) chain_map="btc/main" ;;
+        ETH) chain_map="eth/main" ;;
+        LTC) chain_map="ltc/main" ;;
+        DOGE) chain_map="doge/main" ;;
+        DASH) chain_map="dash/main" ;;
+        *) return 1 ;;
+    esac
+
+    local api_url="https://api.blockcypher.com/v1/${chain_map}/addrs/${address}/balance"
+    if [ -n "$BLOCKCYPHER_TOKEN" ]; then
+        api_url="${api_url}?token=${BLOCKCYPHER_TOKEN}"
+    fi
+
+    local response
+    response=$(curl -s --connect-timeout 5 --max-time 10 "$api_url")
+    if [ -z "$response" ] || [ "$(echo "$response" | jq -r '.error // ""')" != "" ]; then
+        return 1
+    fi
+
+    local balance_raw decimals balance
+    balance_raw=$(echo "$response" | jq -r '.balance')
+    decimals=8 # Most chains on BlockCypher use 8 decimals (Satoshis, etc.)
+    if [ "$ticker" = "ETH" ]; then decimals=18; fi # Ethereum uses 18
+
+    balance=$(format_balance "$balance_raw" "$decimals")
+
+    echo "{\"chain\":\"${ticker}\",\"address\":\"${address}\",\"tokens\":[{\"symbol\":\"${ticker}\",\"balance\":\"${balance}\"}]}"
+}
+
+# Fetches balances from Covalent API
+fetch_from_covalent() {
+    local ticker=$1
+    local address=$2
+
+    if [ -z "$COVALENT_API_KEY" ]; then return 1; fi
+
+    local chain_name
+    case "$ticker" in
+        ETH) chain_name="eth-mainnet" ;;
+        MATIC) chain_name="matic-mainnet" ;;
+        AVAX) chain_name="avalanche-mainnet" ;;
+        # Add other Covalent-supported chains here
+        *) return 1 ;;
+    esac
+
+    local api_url="https://api.covalenthq.com/v1/${chain_name}/address/${address}/balances_v2/?key=${COVALENT_API_KEY}"
+    local response
+    response=$(curl -s --connect-timeout 5 --max-time 10 "$api_url")
+    if [ -z "$response" ] || [ "$(echo "$response" | jq -r '.error // ""')" != "" ]; then
+        return 1
+    fi
+
+    local tokens_json
+    tokens_json=$(echo "$response" | jq -c '[.data.items[] | select(.balance != "0") | {symbol: .contract_ticker_symbol, balance: .balance, decimals: .contract_decimals}]')
+
+    local final_tokens="[]"
+    while IFS= read -r token_line; do
+        local symbol balance_raw decimals balance
+        symbol=$(echo "$token_line" | jq -r '.symbol')
+        balance_raw=$(echo "$token_line" | jq -r '.balance')
+        decimals=$(echo "$token_line" | jq -r '.decimals')
+        balance=$(format_balance "$balance_raw" "$decimals")
+
+        final_tokens=$(echo "$final_tokens" | jq ". + [{\"symbol\":\"${symbol}\",\"balance\":\"${balance}\"}]")
+    done <<< "$(echo "$tokens_json" | jq -c '.[]')"
+
+    if [ "$(echo "$final_tokens" | jq '. | length')" -eq 0 ]; then return 1; fi
+
+    echo "{\"chain\":\"${ticker}\",\"address\":\"${address}\",\"tokens\":${final_tokens}}"
+}
+
+
+# --- Main Dispatcher ---
+
 WALLET_VARS=$(env | grep "^CRYPTO_WALLET_")
+if [ -z "$WALLET_VARS" ]; then exit 0; fi
 
-# If no wallet variables are set, exit gracefully.
-if [ -z "$WALLET_VARS" ]; then
-    exit 0
-fi
-
-ALL_BALANCES_JSON="["
-FIRST_WALLET=true
+ALL_BALANCES_JSON="[]"
 while IFS= read -r line; do
     VAR_NAME=$(echo "$line" | cut -d'=' -f1)
     ADDRESS=$(echo "$line" | cut -d'=' -f2- | tr -d '"')
     TICKER=$(echo "$VAR_NAME" | sed 's/CRYPTO_WALLET_//')
 
-    CHAIN_NAME=$(get_chain_name "$TICKER")
-    if [ -z "$CHAIN_NAME" ]; then continue; fi
+    PROVIDER=$(get_provider "$TICKER")
 
-    API_URL="https://api.covalenthq.com/v1/${CHAIN_NAME}/address/${ADDRESS}/balances_v2/?key=${GOLDRUSH_API_KEY}"
-    API_RESPONSE=$(curl -s --connect-timeout 5 --max-time 10 "$API_URL")
-    ERROR=$(echo "$API_RESPONSE" | jq -r '.error')
+    wallet_json=""
+    case "$PROVIDER" in
+        local)
+            if [ "$TICKER" = "BTC" ]; then
+                wallet_json=$(fetch_from_local_btc)
+            fi
+            ;;
+        blockcypher)
+            wallet_json=$(fetch_from_blockcypher "$TICKER" "$ADDRESS")
+            ;;
+        covalent)
+            wallet_json=$(fetch_from_covalent "$TICKER" "$ADDRESS")
+            ;;
+    esac
 
-    if [ "$ERROR" != "null" ]; then continue; fi
-
-    # Start building JSON for this wallet
-    if [ "$FIRST_WALLET" = false ]; then ALL_BALANCES_JSON="${ALL_BALANCES_JSON},"; fi
-    FIRST_WALLET=false
-    ALL_BALANCES_JSON="${ALL_BALANCES_JSON}{\"chain\":\"${TICKER}\",\"address\":\"${ADDRESS}\",\"tokens\":["
-
-    TOKENS_JSON=$(echo "$API_RESPONSE" | jq -c '.data.items[] | select(.balance != "0") | {symbol: .contract_ticker_symbol, balance: .balance, decimals: .contract_decimals}')
-
-    FIRST_TOKEN=true
-    while IFS= read -r token_line; do
-        SYMBOL=$(echo "$token_line" | jq -r '.symbol')
-        BALANCE_RAW=$(echo "$token_line" | jq -r '.balance')
-        DECIMALS=$(echo "$token_line" | jq -r '.decimals')
-
-        BALANCE=$(format_balance "$BALANCE_RAW" "$DECIMALS")
-
-        if [ "$FIRST_TOKEN" = false ]; then ALL_BALANCES_JSON="${ALL_BALANCES_JSON},"; fi
-        FIRST_TOKEN=false
-        ALL_BALANCES_JSON="${ALL_BALANCES_JSON}{\"symbol\":\"${SYMBOL}\",\"balance\":\"${BALANCE}\"}"
-    done <<< "$TOKENS_JSON"
-
-    ALL_BALANCES_JSON="${ALL_BALANCES_JSON}]}"
+    if [ -n "$wallet_json" ]; then
+        ALL_BALANCES_JSON=$(echo "$ALL_BALANCES_JSON" | jq ". + [$wallet_json]")
+    fi
 done <<< "$WALLET_VARS"
 
-ALL_BALANCES_JSON="${ALL_BALANCES_JSON}]"
-
-# If we didn't find anything, exit gracefully
-if [ "$ALL_BALANCES_JSON" = "[]" ] || [ "$ALL_BALANCES_JSON" = "[,]" ]; then
+if [ "$(echo "$ALL_BALANCES_JSON" | jq '. | length')" -eq 0 ]; then
     exit 0
 fi
 
-# Pass the final JSON to the output formatting section
 DATA=$ALL_BALANCES_JSON
 
 # --- Output Formatting ---
