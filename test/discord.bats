@@ -2,68 +2,67 @@
 
 setup() {
   # This setup function is run before each test.
-  if [ ! -f "config/config.sh" ]; then
-    cp config/config.dist.sh config/config.sh
+  if [[ ! -f "../config/config.sh" ]]; then
+    cp ../config/config.dist.sh ../config/config.sh
   fi
-  # Use the server ID provided by the user
-  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID="1400382194509287426"/' config/config.sh
+  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID="1400382194509287426"/' ../config/config.sh
 }
 
 @test "discord module (plain)" {
-  run ./modules/discord.sh plain
+  run ../modules/discord.sh plain
   [ "$status" -eq 0 ]
   [ "${lines[0]}" = "Discord" ]
   [[ "${lines[1]}" =~ ^Online:\ [0-9]+$ ]]
 }
 
 @test "discord module (pretty)" {
-  run ./modules/discord.sh pretty
+  run ../modules/discord.sh pretty
   [ "$status" -eq 0 ]
   [[ "$(echo ${lines[0]} | grep -o 'Discord')" = "Discord" ]]
   [[ "${lines[1]}" =~ ^Online:\ [0-9]+$ ]]
 }
 
 @test "discord module (json)" {
-  run ./modules/discord.sh json
+  run ../modules/discord.sh json
   [ "$status" -eq 0 ]
   echo "$output" | grep -q -E '^"discord":{"online":[0-9]+}$'
 }
 
 @test "discord module (xml)" {
-  run ./modules/discord.sh xml
+  run ../modules/discord.sh xml
   [ "$status" -eq 0 ]
   echo "$output" | grep -q -E '^<discord><online>[0-9]+</online></discord>$'
 }
 
 @test "discord module (html)" {
-  run ./modules/discord.sh html
+  run ../modules/discord.sh html
   [ "$status" -eq 0 ]
   echo "$output" | grep -q -E '^<h2>Discord</h2><ul><li>Online: [0-9]+</li></ul>$'
 }
 
 @test "discord module (yaml)" {
-  run ./modules/discord.sh yaml
+  run ../modules/discord.sh yaml
   [ "$status" -eq 0 ]
   [ "${lines[0]}" = "discord:" ]
   [[ "${lines[1]}" =~ \ \ online:\ [0-9]+ ]]
 }
 
 @test "discord module (csv)" {
-  run ./modules/discord.sh csv
+  run ../modules/discord.sh csv
   [ "$status" -eq 0 ]
   [[ "$output" =~ ^discord,online,[0-9]+$ ]]
 }
 
 @test "discord module (markdown)" {
-  run ./modules/discord.sh markdown
+  run ../modules/discord.sh markdown
   [ "$status" -eq 0 ]
   [ "${lines[0]}" = "### Discord" ]
   [[ "${lines[1]}" =~ ^-\ Online:\ [0-9]+$ ]]
 }
 
 @test "discord module with no server id" {
-  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID=""/' config/config.sh
-  run ./modules/discord.sh plain
+  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID=""/' ../config/config.sh
+  run ../modules/discord.sh plain
   [ "$status" -eq 0 ]
   [ -z "$output" ] # Should produce no output
 }

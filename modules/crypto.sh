@@ -93,13 +93,13 @@ fetch_from_blockcypher() {
     fi
     local response
     response=$(curl -s --connect-timeout 5 --max-time 10 "$api_url")
-    if [[ -z "$response" ]] || [[ "$(echo "$response" | jq -r '.error // ""')" != "" ]]; then
+    if [[ -z "$response" || "$(echo "$response" | jq -r '.error // ""')" != "" ]]; then
         return 1
     fi
     local balance_raw decimals balance
     balance_raw=$(echo "$response" | jq -r '.balance')
     decimals=8
-    if [[ "$ticker" = "ETH" ]]; then decimals=18; fi
+    if [[ "$ticker" == "ETH" ]]; then decimals=18; fi
     balance=$(format_balance "$balance_raw" "$decimals")
     echo "{\"chain\":\"${ticker}\",\"address\":\"${address}\",\"tokens\":[{\"symbol\":\"${ticker}\",\"balance\":\"${balance}\"}]}"
 }
@@ -118,7 +118,7 @@ fetch_from_covalent() {
     local api_url="https://api.covalenthq.com/v1/${chain_name}/address/${address}/balances_v2/?key=${COVALENT_API_KEY}"
     local response
     response=$(curl -s --connect-timeout 5 --max-time 10 "$api_url")
-    if [[ -z "$response" ]] || [[ "$(echo "$response" | jq -r '.error // ""')" != "" ]]; then
+    if [[ -z "$response" || "$(echo "$response" | jq -r '.error // ""')" != "" ]]; then
         return 1
     fi
     local tokens_json
@@ -132,7 +132,7 @@ fetch_from_covalent() {
         balance=$(format_balance "$balance_raw" "$decimals")
         final_tokens=$(echo "$final_tokens" | jq ". + [{\"symbol\":\"${symbol}\",\"balance\":\"${balance}\"}]")
     done <<< "$(echo "$tokens_json" | jq -c '.[]')"
-    if [[ "$(echo "$final_tokens" | jq '. | length')" -eq 0 ]]; then return 1; fi
+    if (( $(echo "$final_tokens" | jq '. | length') == 0 )); then return 1; fi
     echo "{\"chain\":\"${ticker}\",\"address\":\"${address}\",\"tokens\":${final_tokens}}"
 }
 
@@ -150,7 +150,7 @@ while IFS= read -r line; do
     wallet_json=''
     case "$provider" in
         local)
-            if [[ "$ticker" = "BTC" ]]; then
+            if [[ "$ticker" == "BTC" ]]; then
                 wallet_json=$(fetch_from_local_btc)
             fi
             ;;
@@ -166,7 +166,7 @@ while IFS= read -r line; do
     fi
 done <<< "$wallet_vars"
 
-if [[ "$(echo "$all_balances_json" | jq '. | length')" -eq 0 ]]; then
+if (( $(echo "$all_balances_json" | jq '. | length') == 0 )); then
     exit 0
 fi
 data=$all_balances_json

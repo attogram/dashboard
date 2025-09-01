@@ -84,16 +84,12 @@ fetch_repo_data() {
 
     # Check for rate limit error
     if echo "$api_response" | jq -e 'if .message then .message | contains("API rate limit exceeded") else false end' > /dev/null; then
-        echo "github.sh Error: GitHub API rate limit exceeded. To avoid this, please set your GITHUB_TOKEN in the config file." >&2
         # We only want to show this error once, not for every repo.
-        # A simple way to do this is to touch a temporary file.
         if [[ ! -f "/tmp/dashboard_ratelimit_error_shown" ]]; then
+            echo "github.sh Error: GitHub API rate limit exceeded. To avoid this, please set your GITHUB_TOKEN in the config file." >&2
             touch "/tmp/dashboard_ratelimit_error_shown"
             # Clean up the temp file on exit
             trap 'rm -f /tmp/dashboard_ratelimit_error_shown' EXIT
-        else
-            # Error already shown, just exit silently for this repo
-            return
         fi
         return
     fi

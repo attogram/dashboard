@@ -2,15 +2,15 @@
 
 setup() {
   # This setup function is run before each test.
-  if [ ! -f "config/config.sh" ]; then
-    cp config/config.dist.sh config/config.sh
+  if [[ ! -f "../config/config.sh" ]]; then
+    cp ../config/config.dist.sh ../config/config.sh
   fi
-  sed -i 's/GITHUB_USER=".*"/GITHUB_USER="attogram"/' config/config.sh
-  sed -i 's/REPOS=(.*)/REPOS=("base" "2048-lite")/' config/config.sh
+  sed -i 's/GITHUB_USER=".*"/GITHUB_USER="attogram"/' ../config/config.sh
+  sed -i 's/REPOS=(.*)/REPOS=("base" "2048-lite")/' ../config/config.sh
 }
 
 @test "github module (plain)" {
-  run ./modules/github.sh plain
+  run ../modules/github.sh plain
   [ "$status" -eq 0 ]
   [[ "$output" =~ "GitHub Repositories" ]]
   [[ "$output" =~ "base:" ]]
@@ -19,7 +19,7 @@ setup() {
 }
 
 @test "github module (pretty)" {
-  run ./modules/github.sh pretty
+  run ../modules/github.sh pretty
   [ "$status" -eq 0 ]
   clean_output=$(echo "$output" | sed 's/\x1b\[[0-9;]*m//g')
   [[ "$clean_output" =~ "GitHub Repositories" ]]
@@ -29,7 +29,7 @@ setup() {
 }
 
 @test "github module (json)" {
-  run ./modules/github.sh json
+  run ../modules/github.sh json
   [ "$status" -eq 0 ]
   echo "$output" | grep -q -E '"github":{'
   echo "$output" | grep -q -E '"base":{'
@@ -38,7 +38,7 @@ setup() {
 }
 
 @test "github module (xml)" {
-  run ./modules/github.sh xml
+  run ../modules/github.sh xml
   [ "$status" -eq 0 ]
   echo "$output" | grep -q -E '<github>'
   echo "$output" | grep -q -E '<base>'
@@ -47,7 +47,7 @@ setup() {
 }
 
 @test "github module (html)" {
-  run ./modules/github.sh html
+  run ../modules/github.sh html
   [ "$status" -eq 0 ]
   echo "$output" | grep -q -E '<h2>GitHub Repositories</h2>'
   echo "$output" | grep -q -E '<h3>base</h3>'
@@ -56,7 +56,7 @@ setup() {
 }
 
 @test "github module (yaml)" {
-  run ./modules/github.sh yaml
+  run ../modules/github.sh yaml
   [ "$status" -eq 0 ]
   [[ "$output" =~ "github:" ]]
   [[ "$output" =~ "  base:" ]]
@@ -65,14 +65,14 @@ setup() {
 }
 
 @test "github module (csv)" {
-  run ./modules/github.sh csv
+  run ../modules/github.sh csv
   [ "$status" -eq 0 ]
   [[ "$output" =~ "github,base,stars," ]]
   [[ "$output" =~ "github,2048-lite,stars," ]]
 }
 
 @test "github module (markdown)" {
-  run ./modules/github.sh markdown
+  run ../modules/github.sh markdown
   [ "$status" -eq 0 ]
   [[ "$output" =~ "### GitHub Repositories" ]]
   [[ "$output" =~ "#### base" ]]

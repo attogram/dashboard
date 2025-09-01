@@ -87,7 +87,7 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         *)
-            if [[ -z "$module_to_run" ]] && [[ ! "$key" == -* ]]; then
+            if [[ -z "$module_to_run" && ! "$key" == -* ]]; then
                 module_to_run="$key"
                 shift
             else
