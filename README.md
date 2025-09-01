@@ -11,14 +11,16 @@
 
 ![Dashboard Logo](./docs/logos/logo.320.160.png)
 
-**A personal metrics dashboard for open-source creators, right in your terminal.**
+A metrics tool for open-source creators.
 
 Dashboard is a modular, configurable, and robust Bash script that provides a consolidated view of your key metrics from various services like GitHub, Hacker News, and more. With support for multiple output formats including JSON, XML, HTML, and Markdown, you can easily integrate your dashboard into websites, reports, or other tools.
 
 ## Example output
+
 ```bash
 ./dashboard.sh -f tsv
 ```
+
 ```csv
 Date    module    name    value
 2025-09-01T20:28:46Z    discord    discord.online    3
