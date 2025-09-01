@@ -3,16 +3,16 @@
 setup() {
   # This setup function is run before each test.
   # We ensure a valid config.sh is present for the modules to use.
-  if [ ! -f "config.sh" ]; then
-    cp config.dist.sh config.sh
+  if [ ! -f "config/config.sh" ]; then
+    cp config/config.dist.sh config/config.sh
   fi
-  sed -i 's/HN_USER=".*"/HN_USER="pg"/' config.sh
-  sed -i 's/GITHUB_USER=".*"/GITHUB_USER="attogram"/' config.sh
-  sed -i 's/REPOS=(.*)/REPOS=("base" "2048-lite")/' config.sh
+  sed -i 's/HN_USER=".*"/HN_USER="pg"/' config/config.sh
+  sed -i 's/GITHUB_USER=".*"/GITHUB_USER="attogram"/' config/config.sh
+  sed -i 's/REPOS=(.*)/REPOS=("base" "2048-lite")/' config/config.sh
   # Ensure GITHUB_TOKEN is empty so the sponsors module is skipped
-  sed -i 's/GITHUB_TOKEN=".*"/GITHUB_TOKEN=""/' config.sh
+  sed -i 's/GITHUB_TOKEN=".*"/GITHUB_TOKEN=""/' config/config.sh
   # Add the discord server ID for testing
-  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID="1400382194509287426"/' config.sh
+  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID="1400382194509287426"/' config/config.sh
 }
 
 @test "dashboard.sh should be executable" {

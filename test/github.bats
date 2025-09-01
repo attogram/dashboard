@@ -2,11 +2,11 @@
 
 setup() {
   # This setup function is run before each test.
-  if [ ! -f "config.sh" ]; then
-    cp config.dist.sh config.sh
+  if [ ! -f "config/config.sh" ]; then
+    cp config/config.dist.sh config/config.sh
   fi
-  sed -i 's/GITHUB_USER=".*"/GITHUB_USER="attogram"/' config.sh
-  sed -i 's/REPOS=(.*)/REPOS=("base" "2048-lite")/' config.sh
+  sed -i 's/GITHUB_USER=".*"/GITHUB_USER="attogram"/' config/config.sh
+  sed -i 's/REPOS=(.*)/REPOS=("base" "2048-lite")/' config/config.sh
 }
 
 @test "github module (plain)" {

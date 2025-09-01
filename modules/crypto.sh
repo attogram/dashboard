@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # modules/crypto.sh
 #
@@ -7,15 +7,16 @@
 
 # --- Configuration and Setup ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_FILE="${SCRIPT_DIR}/../config.sh"
-if [ -f "$CONFIG_FILE" ]; then
-    source "$CONFIG_FILE"
+config_file="${SCRIPT_DIR}/../config/config.sh"
+if [[ -f "$config_file" ]]; then
+    # shellcheck source=../config/config.sh
+    source "$config_file"
 fi
 
 # --- Input ---
-FORMAT="$1"
-if [ -z "$FORMAT" ]; then
-    echo "Usage: $(basename "$0") <format>" >&2
+format="$1"
+if [[ -z "$format" ]]; then
+    echo "Usage: ${0##*/} <format>" >&2
     exit 1
 fi
 
@@ -27,12 +28,12 @@ format_balance() {
     local decimals="$2"
     local len=${#balance_raw}
     shopt -s extglob
-    if [ "$decimals" -eq 0 ]; then
+    if (( decimals == 0 )); then
         echo "$balance_raw"
         return
     fi
     local frac_part int_part
-    if [ "$len" -le "$decimals" ]; then
+    if (( len <= decimals )); then
         int_part='0'
         frac_part=$(printf "%0*d" "$decimals" "$balance_raw")
     else
@@ -40,7 +41,7 @@ format_balance() {
         frac_part="${balance_raw:$((len - decimals))}"
     fi
     frac_part="${frac_part%%*(0)}"
-    if [ -z "$frac_part" ]; then
+    if [[ -z "$frac_part" ]]; then
         echo "$int_part"
     else
         echo "${int_part}.${frac_part}"
@@ -51,7 +52,7 @@ format_balance() {
 get_provider() {
     local ticker=$1
     local provider_var="CRYPTO_${ticker}_PROVIDER"
-    if [ -n "${!provider_var}" ]; then
+    if [[ -n "${!provider_var}" ]]; then
         echo "${!provider_var}"
     else
         case "$ticker" in
@@ -67,7 +68,7 @@ fetch_from_local_btc() {
     if ! command -v bitcoin-cli &> /dev/null; then return 1; fi
     local btc_info wallet_name balance display_name
     btc_info=$(bitcoin-cli getwalletinfo 2>/dev/null)
-    if [ $? -ne 0 ]; then return 1; fi
+    if (( $? != 0 )); then return 1; fi
     wallet_name=$(echo "$btc_info" | jq -r '.walletname')
     balance=$(echo "$btc_info" | jq -r '.balance')
     display_name="local node ($wallet_name)"
@@ -87,18 +88,18 @@ fetch_from_blockcypher() {
         *) return 1 ;;
     esac
     local api_url="https://api.blockcypher.com/v1/${chain_map}/addrs/${address}/balance"
-    if [ -n "$BLOCKCYPHER_TOKEN" ]; then
+    if [[ -n "$BLOCKCYPHER_TOKEN" ]]; then
         api_url="${api_url}?token=${BLOCKCYPHER_TOKEN}"
     fi
     local response
     response=$(curl -s --connect-timeout 5 --max-time 10 "$api_url")
-    if [ -z "$response" ] || [ "$(echo "$response" | jq -r '.error // ""')" != "" ]; then
+    if [[ -z "$response" ]] || [[ "$(echo "$response" | jq -r '.error // ""')" != "" ]]; then
         return 1
     fi
     local balance_raw decimals balance
     balance_raw=$(echo "$response" | jq -r '.balance')
     decimals=8
-    if [ "$ticker" = "ETH" ]; then decimals=18; fi
+    if [[ "$ticker" = "ETH" ]]; then decimals=18; fi
     balance=$(format_balance "$balance_raw" "$decimals")
     echo "{\"chain\":\"${ticker}\",\"address\":\"${address}\",\"tokens\":[{\"symbol\":\"${ticker}\",\"balance\":\"${balance}\"}]}"
 }
@@ -106,7 +107,7 @@ fetch_from_blockcypher() {
 fetch_from_covalent() {
     local ticker=$1
     local address=$2
-    if [ -z "$COVALENT_API_KEY" ]; then return 1; fi
+    if [[ -z "$COVALENT_API_KEY" ]]; then return 1; fi
     local chain_name
     case "$ticker" in
         ETH) chain_name='eth-mainnet' ;;
@@ -117,7 +118,7 @@ fetch_from_covalent() {
     local api_url="https://api.covalenthq.com/v1/${chain_name}/address/${address}/balances_v2/?key=${COVALENT_API_KEY}"
     local response
     response=$(curl -s --connect-timeout 5 --max-time 10 "$api_url")
-    if [ -z "$response" ] || [ "$(echo "$response" | jq -r '.error // ""')" != "" ]; then
+    if [[ -z "$response" ]] || [[ "$(echo "$response" | jq -r '.error // ""')" != "" ]]; then
         return 1
     fi
     local tokens_json
@@ -131,78 +132,79 @@ fetch_from_covalent() {
         balance=$(format_balance "$balance_raw" "$decimals")
         final_tokens=$(echo "$final_tokens" | jq ". + [{\"symbol\":\"${symbol}\",\"balance\":\"${balance}\"}]")
     done <<< "$(echo "$tokens_json" | jq -c '.[]')"
-    if [ "$(echo "$final_tokens" | jq '. | length')" -eq 0 ]; then return 1; fi
+    if [[ "$(echo "$final_tokens" | jq '. | length')" -eq 0 ]]; then return 1; fi
     echo "{\"chain\":\"${ticker}\",\"address\":\"${address}\",\"tokens\":${final_tokens}}"
 }
 
 # --- Main Dispatcher ---
-WALLET_VARS=$(env | grep "^CRYPTO_WALLET_")
-if [ -z "$WALLET_VARS" ]; then exit 0; fi
+wallet_vars=$(env | grep "^CRYPTO_WALLET_")
+if [[ -z "$wallet_vars" ]]; then exit 0; fi
 
-ALL_BALANCES_JSON='[]'
+all_balances_json='[]'
 while IFS= read -r line; do
-    VAR_NAME=$(echo "$line" | cut -d'=' -f1)
-    ADDRESS=$(echo "$line" | cut -d'=' -f2- | tr -d '"')
-    TICKER=$(echo "$VAR_NAME" | sed 's/CRYPTO_WALLET_//')
-    PROVIDER=$(get_provider "$TICKER")
+    var_name=${line%%=*}
+    address=${line#*=}
+    address=${address//\"/}
+    ticker=${var_name#CRYPTO_WALLET_}
+    provider=$(get_provider "$ticker")
     wallet_json=''
-    case "$PROVIDER" in
+    case "$provider" in
         local)
-            if [ "$TICKER" = "BTC" ]; then
+            if [[ "$ticker" = "BTC" ]]; then
                 wallet_json=$(fetch_from_local_btc)
             fi
             ;;
         blockcypher)
-            wallet_json=$(fetch_from_blockcypher "$TICKER" "$ADDRESS")
+            wallet_json=$(fetch_from_blockcypher "$ticker" "$address")
             ;;
         covalent)
-            wallet_json=$(fetch_from_covalent "$TICKER" "$ADDRESS")
+            wallet_json=$(fetch_from_covalent "$ticker" "$address")
             ;;
     esac
-    if [ -n "$wallet_json" ]; then
-        ALL_BALANCES_JSON=$(echo "$ALL_BALANCES_JSON" | jq ". + [$wallet_json]")
+    if [[ -n "$wallet_json" ]]; then
+        all_balances_json=$(echo "$all_balances_json" | jq ". + [$wallet_json]")
     fi
-done <<< "$WALLET_VARS"
+done <<< "$wallet_vars"
 
-if [ "$(echo "$ALL_BALANCES_JSON" | jq '. | length')" -eq 0 ]; then
+if [[ "$(echo "$all_balances_json" | jq '. | length')" -eq 0 ]]; then
     exit 0
 fi
-DATA=$ALL_BALANCES_JSON
+data=$all_balances_json
 
 # --- Output Formatting ---
-case "$FORMAT" in
+case "$format" in
     plain | pretty)
         echo 'Crypto Donations'
-        echo "$DATA" | jq -r '.[] | "\(.chain) (\(.address))\n" + (.tokens[] | "  - \(.symbol): \(.balance)")'
+        echo "$data" | jq -r '.[] | "\(.chain) (\(.address))\n" + (.tokens[] | "  - \(.symbol): \(.balance)")'
         ;;
     json)
-        echo "\"crypto\":${DATA}"
+        echo "\"crypto\":${data}"
         ;;
     xml)
         echo '<crypto>'
-        echo "$DATA" | jq -r '.[] | "  <wallet chain=\"\(.chain)\" address=\"\(.address)\">\n" + (.tokens[] | "    <token symbol=\"\(.symbol)\" balance=\"\(.balance)\"/>") + "\n  </wallet>"'
+        echo "$data" | jq -r '.[] | "  <wallet chain=\"\(.chain)\" address=\"\(.address)\">\n" + (.tokens[] | "    <token symbol=\"\(.symbol)\" balance=\"\(.balance)\"/>") + "\n  </wallet>"'
         echo '</crypto>'
         ;;
     html)
         echo '<h2>Crypto Donations</h2>'
         echo '<ul>'
-        echo "$DATA" | jq -r '.[] | "  <li><b>\(.chain)</b> (<code>\(.address)</code>)<ul>" + (.tokens[] | "<li>\(.symbol): \(.balance)</li>") + "</ul></li>"'
+        echo "$data" | jq -r '.[] | "  <li><b>\(.chain)</b> (<code>\(.address)</code>)<ul>" + (.tokens[] | "<li>\(.symbol): \(.balance)</li>") + "</ul></li>"'
         echo '</ul>'
         ;;
     yaml)
         echo 'crypto:'
-        echo "$DATA" | jq -r '.[] | "  - chain: \(.chain)\n    address: \(.address)\n    tokens:\n" + (.tokens[] | "      - symbol: \(.symbol)\n        balance: \"\(.balance)\"")'
+        echo "$data" | jq -r '.[] | "  - chain: \(.chain)\n    address: \(.address)\n    tokens:\n" + (.tokens[] | "      - symbol: \(.symbol)\n        balance: \"\(.balance)\"")'
         ;;
     csv)
         echo 'module,chain,address,token_symbol,balance'
-        echo "$DATA" | jq -r '.[] | . as $parent | .tokens[] | "crypto,\($parent.chain),\($parent.address),\(.symbol),\(.balance)"'
+        echo "$data" | jq -r '.[] | . as $parent | .tokens[] | "crypto,\($parent.chain),\($parent.address),\(.symbol),\(.balance)"'
         ;;
     markdown)
         echo '### Crypto Donations'
-        echo "$DATA" | jq -r '.[] | "*   **\(.chain)** (`\(.address)`)\n" + (.tokens[] | "    *   **\(.symbol)**: \(.balance)")'
+        echo "$data" | jq -r '.[] | "*   **\(.chain)** (`\(.address)`)\n" + (.tokens[] | "    *   **\(.symbol)**: \(.balance)")'
         ;;
     *)
-        echo "Error: Unsupported format '$FORMAT'" >&2
+        echo "Error: Unsupported format '$format'" >&2
         exit 1
         ;;
 esac

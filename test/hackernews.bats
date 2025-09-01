@@ -3,10 +3,10 @@
 setup() {
   # This setup function is run before each test.
   # We ensure a valid config.sh is present for the module to use.
-  if [ ! -f "config.sh" ]; then
-    cp config.dist.sh config.sh
+  if [ ! -f "config/config.sh" ]; then
+    cp config/config.dist.sh config/config.sh
   fi
-  sed -i 's/HN_USER=".*"/HN_USER="pg"/' config.sh
+  sed -i 's/HN_USER=".*"/HN_USER="pg"/' config/config.sh
 }
 
 @test "hackernews module (plain)" {

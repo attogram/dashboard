@@ -1,8 +1,8 @@
 # Configuration
 
-The Dashboard project is configured via a single shell script, `config.sh`. To get started, you should copy the template file `config.dist.sh` to `config.sh` and edit it with your own settings.
+The Dashboard project is configured via a single shell script, `config/config.sh`. To get started, you should copy the template file `config/config.dist.sh` to `config/config.sh` and edit it with your own settings.
 
-The `config.sh` file is ignored by git, so your personal information and API keys will not be committed to the repository.
+The `config/config.sh` file is ignored by git, so your personal information and API keys will not be committed to the repository.
 
 ## Main Configuration
 

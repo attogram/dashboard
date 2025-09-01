@@ -44,19 +44,19 @@ brew install jq
 
 3.  **Create Your Configuration File**
 
-    The dashboard is configured using a `config.sh` file. A template is provided as `config.dist.sh`. Copy this template to create your own configuration file.
+    The dashboard is configured using a `config/config.sh` file. A template is provided as `config/config.dist.sh`. Copy this template to create your own configuration file.
 
     ```bash
-    cp config.dist.sh config.sh
+    cp config/config.dist.sh config/config.sh
     ```
 
 4.  **Edit Your Configuration**
 
-    Open the `config.sh` file in your favorite text editor. Fill in your usernames for the services you want to track. See the [Configuration Guide](./dashboard-configuration.md) for details on all the available options.
+    Open the `config/config.sh` file in your favorite text editor. Fill in your usernames for the services you want to track. See the [Configuration Guide](./dashboard-configuration.md) for details on all the available options.
 
     ```bash
-    # Example: nano config.sh
-    nano config.sh
+    # Example: nano config/config.sh
+    nano config/config.sh
     ```
 
 5.  **Run the Script**

@@ -77,3 +77,35 @@ As an advanced AI assistant, you have a unique responsibility to uphold the qual
 - **Run Prettier:** Before requesting a review, run `npx prettier --write .` to ensure all files are formatted correctly.
 - **Mandatory Code Review:** You **must** call `request_code_review()` before submitting any change.
 - **Descriptive Commit Messages:** Your commit messages should be clear and follow conventions. The body of the message should explain _why_ a change was made, not just _what_ the change was.
+
+## Bash Style Guide
+
+All Bash scripts in this repository should adhere to the standards outlined in the [YSAP Bash Style Guide](https://style.ysap.sh/). Below is a summary of the key principles.
+
+### Key Principles
+
+- **Shebang**: Use `#!/usr/bin/env bash` for portability.
+- **Variables**:
+  - Use `local` for all variables inside functions.
+  - Avoid uppercase variable names for non-exported variables.
+  - Use `[[ ... ]]` for tests, not `[` or `test`.
+  - Use `((...))` for arithmetic.
+- **Quoting**:
+  - Quote all variables that undergo word-splitting.
+  - Use double quotes for strings that require variable expansion.
+  - Use single quotes for all other strings.
+- **Functions**:
+  - Do not use the `function` keyword.
+- **Error Handling**:
+  - Always check the return code of commands like `cd` that can fail.
+  - Do not use `set -e`.
+- **Commands**:
+  - Prefer Bash built-ins over external commands (e.g., use parameter expansion instead of `sed`).
+  - Do not parse the output of `ls`.
+  - Avoid `eval`.
+- **Readability**:
+  - Use tabs for indentation.
+  - Keep lines under 80 columns.
+  - `then` and `do` should be on the same line as `if`/`while`, preceded by a semicolon.
+
+For the full guide, please visit [style.ysap.sh](https://style.ysap.sh/).

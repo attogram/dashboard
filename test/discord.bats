@@ -2,11 +2,11 @@
 
 setup() {
   # This setup function is run before each test.
-  if [ ! -f "config.sh" ]; then
-    cp config.dist.sh config.sh
+  if [ ! -f "config/config.sh" ]; then
+    cp config/config.dist.sh config/config.sh
   fi
   # Use the server ID provided by the user
-  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID="1400382194509287426"/' config.sh
+  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID="1400382194509287426"/' config/config.sh
 }
 
 @test "discord module (plain)" {
@@ -62,7 +62,7 @@ setup() {
 }
 
 @test "discord module with no server id" {
-  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID=""/' config.sh
+  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID=""/' config/config.sh
   run ./modules/discord.sh plain
   [ "$status" -eq 0 ]
   [ -z "$output" ] # Should produce no output
