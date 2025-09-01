@@ -2,11 +2,16 @@
 
 setup() {
   # This setup function is run before each test.
-  # We ensure a valid config.sh is present for the module to use.
-  if [ ! -f "config.sh" ]; then
-    cp config.dist.sh config.sh
-  fi
-  sed -i 's/HN_USER=".*"/HN_USER="pg"/' config.sh
+  # We create a consistent config.sh for all hackernews tests.
+  cat > config.sh <<'EOL'
+# Test Configuration
+HN_USER='pg'
+EOL
+}
+
+teardown() {
+  # This teardown function is run after each test.
+  rm -f config.sh
 }
 
 @test "hackernews module (plain)" {

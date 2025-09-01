@@ -2,11 +2,17 @@
 
 setup() {
   # This setup function is run before each test.
-  if [ ! -f "config.sh" ]; then
-    cp config.dist.sh config.sh
-  fi
-  sed -i 's/GITHUB_USER=".*"/GITHUB_USER="attogram"/' config.sh
-  sed -i 's/REPOS=(.*)/REPOS=("base" "2048-lite")/' config.sh
+  # We create a consistent config.sh for all github tests.
+  cat > config.sh <<'EOL'
+# Test Configuration
+GITHUB_USER='attogram'
+REPOS=('base' '2048-lite')
+EOL
+}
+
+teardown() {
+  # This teardown function is run after each test.
+  rm -f config.sh
 }
 
 @test "github module (plain)" {
