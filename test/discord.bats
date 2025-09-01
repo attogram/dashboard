@@ -2,11 +2,16 @@
 
 setup() {
   # This setup function is run before each test.
-  if [ ! -f "config.sh" ]; then
-    cp config.dist.sh config.sh
-  fi
-  # Use the server ID provided by the user
-  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID="1400382194509287426"/' config.sh
+  # We create a consistent config.sh for all discord tests.
+  cat > config.sh <<'EOL'
+# Test Configuration
+DISCORD_SERVER_ID='1400382194509287426'
+EOL
+}
+
+teardown() {
+  # This teardown function is run after each test.
+  rm -f config.sh
 }
 
 @test "discord module (plain)" {
@@ -62,7 +67,11 @@ setup() {
 }
 
 @test "discord module with no server id" {
-  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID=""/' config.sh
+  # Overwrite the config.sh created by setup()
+  cat > config.sh <<'EOL'
+# Test Configuration
+DISCORD_SERVER_ID=''
+EOL
   run ./modules/discord.sh plain
   [ "$status" -eq 0 ]
   [ -z "$output" ] # Should produce no output

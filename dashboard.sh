@@ -22,7 +22,7 @@ DASHBOARD_DEBUG=0 # 0 = off, 1 = on
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FORMAT="plain"
 MODULE_TO_RUN=""
-VALID_FORMATS=("plain" "pretty" "json" "xml" "html" "yaml" "csv" "markdown")
+VALID_FORMATS=("plain" "pretty" "json" "xml" "html" "yaml" "csv" "markdown" "tsv")
 
 _debug() {
   (( DASHBOARD_DEBUG )) || return 0
@@ -172,6 +172,10 @@ case "$FORMAT" in
         ;;
     csv)
         echo "module,key,value"
+        printf '%s\n' "${OUTPUTS[@]}"
+        ;;
+    tsv)
+        echo -e "Date\tmodule\tname\tvalue"
         printf '%s\n' "${OUTPUTS[@]}"
         ;;
     *)

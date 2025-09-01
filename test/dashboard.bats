@@ -2,17 +2,22 @@
 
 setup() {
   # This setup function is run before each test.
-  # We ensure a valid config.sh is present for the modules to use.
-  if [ ! -f "config.sh" ]; then
-    cp config.dist.sh config.sh
-  fi
-  sed -i 's/HN_USER=".*"/HN_USER="pg"/' config.sh
-  sed -i 's/GITHUB_USER=".*"/GITHUB_USER="attogram"/' config.sh
-  sed -i 's/REPOS=(.*)/REPOS=("base" "2048-lite")/' config.sh
-  # Ensure GITHUB_TOKEN is empty so the sponsors module is skipped
-  sed -i 's/GITHUB_TOKEN=".*"/GITHUB_TOKEN=""/' config.sh
-  # Add the discord server ID for testing
-  sed -i 's/DISCORD_SERVER_ID=".*"/DISCORD_SERVER_ID="1400382194509287426"/' config.sh
+  # We create a consistent config.sh for all dashboard integration tests.
+  cat > config.sh <<'EOL'
+# Test Configuration
+HN_USER='pg'
+GITHUB_USER='attogram'
+REPOS=('base' '2048-lite')
+DISCORD_SERVER_ID='1400382194509287426'
+GITHUB_TOKEN=''
+CRYPTO_WALLET_BTC='1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+CRYPTO_WALLET_ETH='0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae'
+EOL
+}
+
+teardown() {
+  # This teardown function is run after each test.
+  rm -f config.sh
 }
 
 @test "dashboard.sh should be executable" {
