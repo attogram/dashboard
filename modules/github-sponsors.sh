@@ -97,10 +97,6 @@ case "$FORMAT" in
     csv)
         echo "github-sponsors,sponsors,${SPONSORS_COUNT}"
         ;;
-        tsv)
-            now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            printf "%s\tgithub-sponsors\tgithub-sponsors.sponsors\t%s\n" "$now" "$SPONSORS_COUNT"
-            ;;
     markdown)
         echo "### GitHub Sponsors"
         echo "- Sponsors: ${SPONSORS_COUNT}"

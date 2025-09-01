@@ -87,10 +87,6 @@ case "$FORMAT" in
     csv)
         echo "discord,online,${ONLINE_COUNT}"
         ;;
-        tsv)
-            now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            printf "%s\tdiscord\tdiscord.online\t%s\n" "$now" "$ONLINE_COUNT"
-            ;;
     markdown)
         echo "### Discord"
         echo "- Online: ${ONLINE_COUNT}"
