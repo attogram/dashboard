@@ -24,7 +24,7 @@ dashboard_debug=0 # 0 = off, 1 = on
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 format="plain"
 module_to_run=""
-valid_formats=("plain" "pretty" "json" "xml" "html" "yaml" "csv" "markdown")
+valid_formats=("plain" "pretty" "json" "xml" "html" "yaml" "csv" "markdown" "tsv")
 
 _debug() {
   (( dashboard_debug )) || return 0
@@ -206,6 +206,10 @@ case "$format" in
     markdown)
         echo "_Report generated at: ${timestamp}_"
         echo ""
+        printf '%s\n' "${outputs[@]}"
+        ;;
+    tsv)
+        echo -e "Date\tmodule\tname\tvalue"
         printf '%s\n' "${outputs[@]}"
         ;;
     *)

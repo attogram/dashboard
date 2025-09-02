@@ -2,17 +2,23 @@
 
 setup() {
   # This setup function is run before each test.
-  if [[ ! -f "../config/config.sh" ]]; then
-    cp ../config/config.dist.sh ../config/config.sh
-  fi
-  sed -i 's/GITHUB_USER=".*"/GITHUB_USER="attogram"/' ../config/config.sh
-  sed -i 's/REPOS=(.*)/REPOS=("base" "2048-lite")/' ../config/config.sh
+  mkdir -p ../config
+  cat > ../config/config.sh <<'EOL'
+# Test Configuration
+GITHUB_USER='attogram'
+REPOS=('base' '2048-lite')
+EOL
+}
+
+teardown() {
+  # This teardown function is run after each test.
+  rm -f ../config/config.sh
 }
 
 @test "github module (plain)" {
   run ../modules/github.sh plain
   [ "$status" -eq 0 ]
-  [[ "$output" =~ "GitHub Repositories" ]]
+  [[ "$output" =~ "GitHub Repositories for attogram" ]]
   [[ "$output" =~ "base:" ]]
   [[ "$output" =~ "Stars: " ]]
   [[ "$output" =~ "2048-lite:" ]]
@@ -22,7 +28,7 @@ setup() {
   run ../modules/github.sh pretty
   [ "$status" -eq 0 ]
   clean_output=$(echo "$output" | sed 's/\x1b\[[0-9;]*m//g')
-  [[ "$clean_output" =~ "GitHub Repositories" ]]
+  [[ "$clean_output" =~ "GitHub Repositories for attogram" ]]
   [[ "$clean_output" =~ "base:" ]]
   [[ "$clean_output" =~ "Stars: " ]]
   [[ "$clean_output" =~ "2048-lite:" ]]
@@ -31,7 +37,7 @@ setup() {
 @test "github module (json)" {
   run ../modules/github.sh json
   [ "$status" -eq 0 ]
-  echo "$output" | grep -q -E '"github":{'
+  echo "$output" | grep -q -E '"github":{"user":"attogram","url":"https://github.com/attogram","repositories":{'
   echo "$output" | grep -q -E '"base":{'
   echo "$output" | grep -q -E '"stars":'
   echo "$output" | grep -q -E '"2048-lite":{'
@@ -40,7 +46,7 @@ setup() {
 @test "github module (xml)" {
   run ../modules/github.sh xml
   [ "$status" -eq 0 ]
-  echo "$output" | grep -q -E '<github>'
+  echo "$output" | grep -q -E '<github user="attogram" url="https://github.com/attogram">'
   echo "$output" | grep -q -E '<base>'
   echo "$output" | grep -q -E '<stars>'
   echo "$output" | grep -q -E '<_2048_lite>'
@@ -49,7 +55,7 @@ setup() {
 @test "github module (html)" {
   run ../modules/github.sh html
   [ "$status" -eq 0 ]
-  echo "$output" | grep -q -E '<h2>GitHub Repositories</h2>'
+  echo "$output" | grep -q -E '<h2><a href="https://github.com/attogram">GitHub Repositories for attogram</a></h2>'
   echo "$output" | grep -q -E '<h3>base</h3>'
   echo "$output" | grep -q -E '<li>Stars: '
   echo "$output" | grep -q -E '<h3>2048-lite</h3>'
@@ -59,14 +65,16 @@ setup() {
   run ../modules/github.sh yaml
   [ "$status" -eq 0 ]
   [[ "$output" =~ "github:" ]]
-  [[ "$output" =~ "  base:" ]]
-  [[ "$output" =~ "    stars:" ]]
-  [[ "$output" =~ "  2048-lite:" ]]
+  [[ "$output" =~ "  user: attogram" ]]
+  [[ "$output" =~ "    base:" ]]
+  [[ "$output" =~ "      stars:" ]]
+  [[ "$output" =~ "    2048-lite:" ]]
 }
 
 @test "github module (csv)" {
   run ../modules/github.sh csv
   [ "$status" -eq 0 ]
+  echo "$output" | grep -q "github,user,attogram"
   [[ "$output" =~ "github,base,stars," ]]
   [[ "$output" =~ "github,2048-lite,stars," ]]
 }
@@ -74,7 +82,7 @@ setup() {
 @test "github module (markdown)" {
   run ../modules/github.sh markdown
   [ "$status" -eq 0 ]
-  [[ "$output" =~ "### GitHub Repositories" ]]
+  [[ "$output" =~ "### [GitHub Repositories for attogram](https://github.com/attogram)" ]]
   [[ "$output" =~ "#### base" ]]
   [[ "$output" =~ "- Stars: " ]]
   [[ "$output" =~ "#### 2048-lite" ]]
