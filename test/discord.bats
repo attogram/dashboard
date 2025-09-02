@@ -2,6 +2,7 @@
 
 setup() {
   # This setup function is run before each test.
+
   mkdir -p ../config
   cat > ../config/config.sh <<'EOL'
 # Test Configuration

@@ -22,6 +22,7 @@ dashboard_copyright='Copyright (c) 2025 Attogram Project <https://github.com/att
 dashboard_debug=0 # 0 = off, 1 = on
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 format="plain"
 module_to_run=""
 valid_formats=("plain" "pretty" "json" "xml" "html" "yaml" "csv" "markdown" "tsv")
@@ -211,6 +212,10 @@ case "$format" in
     tsv)
         echo -e "Date\tmodule\tname\tvalue"
         printf '%s\n' "${outputs[@]}"
+        ;;
+    tsv)
+        echo -e "Date\tmodule\tname\tvalue"
+        printf '%s\n' "${OUTPUTS[@]}"
         ;;
     *)
         # For plain and pretty

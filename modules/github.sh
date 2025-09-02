@@ -143,6 +143,14 @@ fetch_repo_data() {
             echo "github,${repo_name},issues,${issues}"
             echo "github,${repo_name},watchers,${watchers}"
             ;;
+        tsv)
+            local now
+            now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            printf "%s\tgithub\trepo.%s.%s.stars\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$stars"
+            printf "%s\tgithub\trepo.%s.%s.forks\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$forks"
+            printf "%s\tgithub\trepo.%s.%s.open_issues\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$issues"
+            printf "%s\tgithub\trepo.%s.%s.watchers\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$watchers"
+            ;;
         markdown)
             echo "#### ${repo_name}"
             echo "- Stars: ${stars}"
@@ -196,6 +204,9 @@ case "$format" in
         echo "github,user,${GITHUB_USER}"
         echo "github,url,${github_url}"
         for repo in "${REPOS[@]}"; do fetch_repo_data "$repo" "$format"; done
+        ;;
+    tsv)
+        for repo in "${REPOS[@]}"; do fetch_repo_data "$repo" "$FORMAT"; done
         ;;
     markdown)
         echo "### [GitHub Repositories for ${GITHUB_USER}](${github_url})"

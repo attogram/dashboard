@@ -91,6 +91,10 @@ case "$format" in
         echo "hackernews,url,${hn_url}"
         echo "hackernews,karma,${karma}"
         ;;
+        tsv)
+            now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            printf "%s\thackernews\thackernews.karma\t%s\n" "$now" "$KARMA"
+            ;;
     markdown)
         echo "### [Hacker News for ${HN_USER}](${hn_url})"
         echo "- Karma: ${karma}"

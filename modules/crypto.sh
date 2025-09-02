@@ -199,6 +199,10 @@ case "$format" in
         echo 'module,chain,address,token_symbol,balance'
         echo "$data" | jq -r '.[] | . as $parent | .tokens[] | "crypto,\($parent.chain),\($parent.address),\(.symbol),\(.balance)"'
         ;;
+        tsv)
+            now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            echo "$DATA" | jq -r --arg now "$now" '.[] | . as $parent | .tokens[] | [$now, "crypto", "crypto." + $parent.chain + "." + $parent.address + "." + .symbol, .balance] | @tsv'
+            ;;
     markdown)
         echo '### Crypto Donations'
         echo "$data" | jq -r '.[] | "*   **\(.chain)** (`\(.address)`)\n" + (.tokens[] | "    *   **\(.symbol)**: \(.balance)")'

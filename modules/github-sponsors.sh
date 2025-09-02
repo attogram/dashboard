@@ -117,6 +117,10 @@ case "$format" in
         echo "github-sponsors,url,${sponsors_url}"
         echo "github-sponsors,sponsors,${sponsors_count}"
         ;;
+        tsv)
+            now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            printf "%s\tgithub-sponsors\tgithub-sponsors.sponsors\t%s\n" "$now" "$SPONSORS_COUNT"
+            ;;
     markdown)
         echo "### [${sponsors_title}](${sponsors_url})"
         echo "- Sponsors: ${sponsors_count}"

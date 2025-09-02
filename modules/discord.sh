@@ -92,6 +92,10 @@ case "$format" in
         echo "discord,server_id,${DISCORD_SERVER_ID}"
         echo "discord,online,${online_count}"
         ;;
+        tsv)
+            now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            printf "%s\tdiscord\tdiscord.online\t%s\n" "$now" "$ONLINE_COUNT"
+            ;;
     markdown)
         echo "### Discord Server: ${server_name}"
         echo "- ID: ${DISCORD_SERVER_ID}"
