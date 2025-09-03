@@ -47,7 +47,7 @@ Date    module    name    value
 
 - **Modular Architecture**: Easily add new services by creating new module scripts. Run a full report or just a single module.
 - **Multiple Output Formats**: Supports `plain`, `pretty` (with colors), `json`, `xml`, `html`, `yaml`, `csv`, and `markdown`.
-- **Configurable**: All settings are controlled via a simple `config.sh` file.
+- **Configurable**: All settings are controlled via a simple `config/config.sh` file.
 - **Minimal Dependencies**: Requires only `curl` and `jq` to run.
 - **Bash v3.2+ Compatible**: Written in pure Bash for maximum compatibility.
 
@@ -71,10 +71,10 @@ Date    module    name    value
 2.  Create your configuration file by copying the template:
 
     ```bash
-    cp config.dist.sh config.sh
+    cp config/config.dist.sh config/config.sh
     ```
 
-3.  Edit `config.sh` with your own usernames and settings.
+3.  Edit `config/config.sh` with your own usernames and settings.
 
 ### Usage
 
@@ -100,7 +100,7 @@ To run only a specific module:
 
 ## Configuration
 
-All configuration is done in the `config.sh` file.
+All configuration is done in the `config/config.sh` file.
 
 ```bash
 # Your Hacker News username

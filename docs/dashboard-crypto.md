@@ -16,7 +16,7 @@ There are three types of providers available:
 
 ### 2. API Keys (Optional)
 
-Some providers require an API key. You should add these to your `config.sh` file if you intend to use them.
+Some providers require an API key. You should add these to your `config/config.sh` file if you intend to use them.
 
 ```bash
 # (Optional) Your Covalent API Key. Required for the "covalent" provider.
@@ -29,7 +29,7 @@ BLOCKCYPHER_TOKEN=""
 
 ### 3. Wallet and Provider Configuration
 
-For each cryptocurrency you want to track, you need to add a `CRYPTO_WALLET_<TICKER>` variable to your `config.sh`.
+For each cryptocurrency you want to track, you need to add a `CRYPTO_WALLET_<TICKER>` variable to your `config/config.sh`.
 
 You can also specify which provider to use for each ticker with a `CRYPTO_<TICKER>_PROVIDER` variable. If you don't specify a provider for a coin, the module will use a sensible default (`blockcypher` for supported coins, `covalent` otherwise).
 

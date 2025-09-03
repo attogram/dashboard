@@ -6,7 +6,7 @@ The core components of the architecture are:
 
 1.  **The Main Runner (`dashboard.sh`)**: This is the entry point of the application. Its primary responsibilities are to parse command-line arguments, load the configuration, and orchestrate the execution of the modules. It is also responsible for assembling the final report by wrapping the module outputs in the correct headers and footers for formats like JSON, XML, and HTML.
 
-2.  **The Configuration File (`config.sh`)**: This file is the central point of configuration for the user. It contains all the necessary information for the modules to run, such as usernames, API keys, and other settings. It is sourced by both the main runner and the individual modules.
+2.  **The Configuration File (`config/config.sh`)**: This file is the central point of configuration for the user. It contains all the necessary information for the modules to run, such as usernames, API keys, and other settings. It is sourced by both the main runner and the individual modules.
 
 3.  **The Modules Directory (`modules/`)**: This directory contains an executable script for each service that the dashboard tracks. Each module is a self-contained script that is responsible for:
     - Fetching data from its specific service's API.

@@ -15,7 +15,7 @@
 
 # Set script directory to find config.sh
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_FILE="${SCRIPT_DIR}/../config.sh"
+CONFIG_FILE="${SCRIPT_DIR}/../config/config.sh"
 
 #echo "github.sh Loading CONFIG_FILE: $CONFIG_FILE"
 
