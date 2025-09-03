@@ -6,7 +6,17 @@ Below are examples of the output from the `hackernews` module for each supported
 
 ---
 
-### `plain` (Default)
+### `tsv` (Default)
+
+Tab-separated values, similar to CSV but using tabs as delimiters. The format is `Date\tmodule\tname\tvalue`.
+
+```tsv
+2025-09-03T14:48:11Z	hackernews	karma	20
+```
+
+---
+
+### `plain`
 
 Simple, clean text output suitable for scripting or a quick glance.
 
@@ -94,14 +104,6 @@ hackernews,karma,20
 ```
 
 ---
-
-### `tsv`
-
-Tab-separated values, similar to CSV but using tabs as delimiters. The format is `Date\tmodule\tname\tvalue`.
-
-```tsv
-2025-09-03T14:48:11Z	hackernews	karma	20
-```
 
 ---
 

@@ -8,6 +8,7 @@ setup() {
 # Test Configuration
 HN_USER='pg'
 EOL
+  tab=$(printf '\t')
 }
 
 teardown() {
@@ -66,6 +67,12 @@ teardown() {
   [ "$status" -eq 0 ]
   [ "${lines[0]}" = "### Hacker News" ]
   [[ "${lines[1]}" =~ ^-\ Karma:\ [0-9]+$ ]]
+}
+
+@test "hackernews module (tsv)" {
+  run ./modules/hackernews.sh tsv
+  [ "$status" -eq 0 ]
+  [[ "$output" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z${tab}hackernews${tab}karma${tab}[0-9]+$ ]]
 }
 
 @test "hackernews module requires a format" {

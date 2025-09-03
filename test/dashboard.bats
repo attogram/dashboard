@@ -17,9 +17,46 @@ EOL
   tab=$(printf '\t')
 }
 
+@test "integration: default output should be to a file in ./reports" {
+  run ./dashboard.sh
+  [ "$status" -eq 0 ]
+  [ -d "reports" ]
+  # Find the created file
+  report_file=$(find reports -type f -name "*.tsv")
+  [ -n "$report_file" ]
+  # Check content
+  content=$(cat "$report_file")
+  [[ "$content" == *"Date${tab}module${tab}name${tab}value"* ]]
+  [[ "$content" == *"hackernews${tab}karma"* ]]
+  rm -r reports
+}
+
+@test "integration: -o option with a file path" {
+  run ./dashboard.sh -o my_report.tsv
+  [ "$status" -eq 0 ]
+  [ -f "my_report.tsv" ]
+  content=$(cat "my_report.tsv")
+  [[ "$content" == *"Date${tab}module${tab}name${tab}value"* ]]
+  rm my_report.tsv
+}
+
+@test "integration: -o option with a directory path" {
+  mkdir -p my_reports
+  run ./dashboard.sh -o my_reports
+  [ "$status" -eq 0 ]
+  report_file=$(find my_reports -type f -name "*.tsv")
+  [ -n "$report_file" ]
+  content=$(cat "$report_file")
+  [[ "$content" == *"Date${tab}module${tab}name${tab}value"* ]]
+  rm -r my_reports
+}
+
 teardown() {
   # This teardown function is run after each test.
   rm -rf config
+  rm -rf reports
+  rm -f my_report.tsv
+  rm -rf my_reports
 }
 
 @test "dashboard.sh should be executable" {
@@ -33,9 +70,6 @@ teardown() {
 
 @test "dashboard.sh --help should show usage" {
   run ./dashboard.sh --help
-  echo "--- HELP OUTPUT ---"
-  echo "$output"
-  echo "--- END HELP OUTPUT ---"
   [ "${lines[0]}" = "Usage: dashboard.sh [options] [module]" ]
   echo "$output" | grep -q "Available modules:"
   echo "$output" | grep -q "crypto"
@@ -47,7 +81,7 @@ teardown() {
 # --- Integration Tests for Aggregated Output ---
 
 @test "integration: json output should be valid json" {
-  run ./dashboard.sh --format json
+  run ./dashboard.sh --format json -o /dev/stdout
   [ "$status" -eq 0 ]
   # Pipe the output to jq to validate it.
   # jq will exit with a non-zero status if the JSON is invalid.
@@ -55,7 +89,7 @@ teardown() {
 }
 
 @test "integration: xml output should contain root element and module data" {
-  run ./dashboard.sh --format xml
+  run ./dashboard.sh --format xml -o /dev/stdout
   [ "$status" -eq 0 ]
   clean_output=$(echo "$output" | tr -d '\n\r')
   echo "$clean_output" | grep -q -E '^<\?xml version="1.0" encoding="UTF-8"\?><dashboard>.*</dashboard>$'
@@ -64,7 +98,7 @@ teardown() {
 }
 
 @test "integration: html output should contain root elements and module data" {
-  run ./dashboard.sh --format html
+  run ./dashboard.sh --format html -o /dev/stdout
   [ "$status" -eq 0 ]
   clean_output=$(echo "$output" | tr -d '\n\r')
   echo "$clean_output" | grep -q -E '^<!DOCTYPE html><html><head>.*</head><body>.*</body></html>$'
@@ -73,7 +107,7 @@ teardown() {
 }
 
 @test "integration: csv output should contain headers and module data" {
-  run ./dashboard.sh --format csv
+  run ./dashboard.sh --format csv -o /dev/stdout
   [ "$status" -eq 0 ]
   [ "${lines[0]}" = "module,key,value" ]
   echo "$output" | grep -q "hackernews,karma"
@@ -81,14 +115,14 @@ teardown() {
 }
 
 @test "integration: tsv output should contain headers and module data" {
-  run ./dashboard.sh --format tsv
+  run ./dashboard.sh --format tsv -o /dev/stdout
   [ "$status" -eq 0 ]
   [ "${lines[0]}" = "Date${tab}module${tab}name${tab}value" ]
   echo "$output" | grep -q "hackernews${tab}karma"
 }
 
 @test "integration: table output should be a pretty ascii table" {
-  run ./dashboard.sh --format table
+  run ./dashboard.sh --format table -o /dev/stdout
   [ "$status" -eq 0 ]
   # Check for top border
   [[ "${lines[0]}" == "+-"* ]]
@@ -101,11 +135,4 @@ teardown() {
   echo "$output" | grep -q "karma"
   # Check for bottom border
   [[ "${lines[-1]}" == "+-"* ]]
-}
-
-@test "integration: default output should be tsv" {
-  run ./dashboard.sh
-  [ "$status" -eq 0 ]
-  [ "${lines[0]}" = "Date${tab}module${tab}name${tab}value" ]
-  echo "$output" | grep -q "hackernews${tab}karma"
 }

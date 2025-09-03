@@ -8,6 +8,7 @@ setup() {
 # Test Configuration
 DISCORD_SERVER_ID='1400382194509287426'
 EOL
+  tab=$(printf '\t')
 }
 
 teardown() {
@@ -65,6 +66,12 @@ teardown() {
   [ "$status" -eq 0 ]
   [ "${lines[0]}" = "### Discord" ]
   [[ "${lines[1]}" =~ ^-\ Online:\ [0-9]+$ ]]
+}
+
+@test "discord module (tsv)" {
+  run ./modules/discord.sh tsv
+  [ "$status" -eq 0 ]
+  [[ "$output" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z${tab}discord${tab}discord.online${tab}[0-9]+$ ]]
 }
 
 @test "discord module with no server id" {

@@ -42,13 +42,12 @@ _error() {
 }
 
 usage() {
-    echo "SCRIPT_DIR: $SCRIPT_DIR"
-    ls -l "${SCRIPT_DIR}/modules"
     echo "Usage: $(basename "$0") [options] [module]"
     echo "Options:"
-    echo "  -f, --format <format>  Set the output format."
-    echo "                         Supported formats: ${VALID_FORMATS[*]}"
-    echo "  -h, --help             Display this help message."
+    echo "  -f, --format <format>    Set the output format."
+    echo "                           Supported formats: ${VALID_FORMATS[*]}"
+    echo "  -o, --output <path>      Set the output file or directory."
+    echo "  -h, --help               Display this help message."
     echo
     echo "Available modules:"
     local modules=()
@@ -66,11 +65,16 @@ _debug "$DASHBOARD_NAME v$DASHBOARD_VERSION"
 
 _debug 'parsing command-line arguments'
 
+OUTPUT_PATH=""
 while [[ $# -gt 0 ]]; do
     key="$1"
     case $key in
         -f|--format)
             FORMAT="$2"
+            shift 2
+            ;;
+        -o|--output)
+            OUTPUT_PATH="$2"
             shift 2
             ;;
         -h|--help)
@@ -168,96 +172,124 @@ for module_name in "${MODULES_TO_RUN[@]}"; do
     fi
 done
 
-_debug "Assemble the final report: FORMAT: $FORMAT"
-
-case "$FORMAT" in
-    json)
-        echo "{"
-        printf '%s,' "${OUTPUTS[@]}" | sed 's/,$//'
-        echo "}"
-        ;;
-    xml)
-        echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><dashboard>"
-        printf '%s\n' "${OUTPUTS[@]}"
-        echo "</dashboard>"
-        ;;
-    html)
-        echo "<!DOCTYPE html><html><head><title>Dashboard</title></head><body>"
-        printf '%s\n' "${OUTPUTS[@]}"
-        echo "</body></html>"
-        ;;
-    csv)
-        echo "module,key,value"
-        printf '%s\n' "${OUTPUTS[@]}"
-        ;;
-    tsv)
-        echo -e "Date\tmodule\tname\tvalue"
-        printf '%s\n' "${OUTPUTS[@]}"
-        ;;
-    table)
-        if ! command -v awk &> /dev/null; then
-            _warn "'awk' command not found. Falling back to tsv format."
+generate_report() {
+    case "$FORMAT" in
+        json)
+            echo "{"
+            printf '%s,' "${OUTPUTS[@]}" | sed 's/,$//'
+            echo "}"
+            ;;
+        xml)
+            echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><dashboard>"
+            printf '%s\n' "${OUTPUTS[@]}"
+            echo "</dashboard>"
+            ;;
+        html)
+            echo "<!DOCTYPE html><html><head><title>Dashboard</title></head><body>"
+            printf '%s\n' "${OUTPUTS[@]}"
+            echo "</body></html>"
+            ;;
+        csv)
+            echo "module,key,value"
+            printf '%s\n' "${OUTPUTS[@]}"
+            ;;
+        tsv)
             echo -e "Date\tmodule\tname\tvalue"
             printf '%s\n' "${OUTPUTS[@]}"
-        else
-            (echo -e "Date\tmodule\tname\tvalue"; printf '%s\n' "${OUTPUTS[@]}") | awk '
-                BEGIN {
-                    FS="\t"
-                }
-                {
-                    for (i=1; i<=NF; i++) {
-                        if (length($i) > max[i]) {
-                            max[i] = length($i)
-                        }
-                        data[NR][i] = $i
+            ;;
+        table)
+            if ! command -v awk &> /dev/null; then
+                _warn "'awk' command not found. Falling back to tsv format."
+                echo -e "Date\tmodule\tname\tvalue"
+                printf '%s\n' "${OUTPUTS[@]}"
+            else
+                (echo -e "Date\tmodule\tname\tvalue"; printf '%s\n' "${OUTPUTS[@]}") | awk '
+                    BEGIN {
+                        FS="\t"
                     }
-                }
-                END {
-                    # Print top border
-                    for (i=1; i<=NF; i++) {
-                        printf "+-"
-                        for (j=1; j<=max[i]; j++) printf "-"
-                        printf "-"
-                    }
-                    printf "+\n"
-
-                    # Print header
-                    for (i=1; i<=NF; i++) {
-                        printf "| %-" max[i] "s ", data[1][i]
-                    }
-                    printf "|\n"
-
-                    # Print separator
-                    for (i=1; i<=NF; i++) {
-                        printf "+-"
-                        for (j=1; j<=max[i]; j++) printf "-"
-                        printf "-"
-                    }
-                    printf "+\n"
-
-                    # Print data
-                    for (row=2; row<=NR; row++) {
+                    {
                         for (i=1; i<=NF; i++) {
-                            printf "| %-" max[i] "s ", data[row][i]
+                            if (length($i) > max[i]) {
+                                max[i] = length($i)
+                            }
+                            data[NR][i] = $i
+                        }
+                    }
+                    END {
+                        # Print top border
+                        for (i=1; i<=NF; i++) {
+                            printf "+-"
+                            for (j=1; j<=max[i]; j++) printf "-"
+                            printf "-"
+                        }
+                        printf "+\n"
+
+                        # Print header
+                        for (i=1; i<=NF; i++) {
+                            printf "| %-" max[i] "s ", data[1][i]
                         }
                         printf "|\n"
-                    }
 
-                    # Print bottom border
-                    for (i=1; i<=NF; i++) {
-                        printf "+-"
-                        for (j=1; j<=max[i]; j++) printf "-"
-                        printf "-"
+                        # Print separator
+                        for (i=1; i<=NF; i++) {
+                            printf "+-"
+                            for (j=1; j<=max[i]; j++) printf "-"
+                            printf "-"
+                        }
+                        printf "+\n"
+
+                        # Print data
+                        for (row=2; row<=NR; row++) {
+                            for (i=1; i<=NF; i++) {
+                                printf "| %-" max[i] "s ", data[row][i]
+                            }
+                            printf "|\n"
+                        }
+
+                        # Print bottom border
+                        for (i=1; i<=NF; i++) {
+                            printf "+-"
+                            for (j=1; j<=max[i]; j++) printf "-"
+                            printf "-"
+                        }
+                        printf "+\n"
                     }
-                    printf "+\n"
-                }
-            '
-        fi
-        ;;
-    *)
-        # For plain, pretty, yaml, markdown, just print the outputs
-        printf '%s\n' "${OUTPUTS[@]}"
-        ;;
-esac
+                '
+            fi
+            ;;
+        *)
+            # For plain, pretty, yaml, markdown, just print the outputs
+            printf '%s\n' "${OUTPUTS[@]}"
+            ;;
+    esac
+}
+
+FINAL_OUTPUT_FILE=""
+if [ -n "$OUTPUT_PATH" ]; then
+    if [ -d "$OUTPUT_PATH" ]; then
+        # User provided a directory
+        REPORTS_DIR="$OUTPUT_PATH"
+        TIMESTAMP=$(date +"%Y-%m-%d-%H-%M")
+        FINAL_OUTPUT_FILE="${REPORTS_DIR}/${TIMESTAMP}.${FORMAT}"
+    else
+        # User provided a file path
+        FINAL_OUTPUT_FILE="$OUTPUT_PATH"
+    fi
+else
+    # Default behavior
+    REPORTS_DIR="${SCRIPT_DIR}/reports"
+    mkdir -p "$REPORTS_DIR"
+    TIMESTAMP=$(date +"%Y-%m-%d-%H-%M")
+    FINAL_OUTPUT_FILE="${REPORTS_DIR}/${TIMESTAMP}.${FORMAT}"
+fi
+
+_debug "Assemble the final report: FORMAT: $FORMAT"
+_debug "Output file: $FINAL_OUTPUT_FILE"
+
+if [ -n "$FINAL_OUTPUT_FILE" ]; then
+    generate_report > "$FINAL_OUTPUT_FILE"
+else
+    generate_report
+fi
 
 _debug 'Done.'

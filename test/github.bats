@@ -9,6 +9,7 @@ setup() {
 GITHUB_USER='attogram'
 REPOS=('base' '2048-lite')
 EOL
+  tab=$(printf '\t')
 }
 
 teardown() {
@@ -85,4 +86,14 @@ teardown() {
   [[ "$output" =~ "#### base" ]]
   [[ "$output" =~ "- Stars: " ]]
   [[ "$output" =~ "#### 2048-lite" ]]
+}
+
+@test "github module (tsv)" {
+  run ./modules/github.sh tsv
+  [ "$status" -eq 0 ]
+  for line in "${lines[@]}"; do
+    [[ "$line" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z${tab}github${tab}.*${tab}([0-9]+|null)$ ]]
+  done
+  echo "$output" | grep -q "base.stars"
+  echo "$output" | grep -q "2048-lite.stars"
 }
