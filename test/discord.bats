@@ -3,7 +3,8 @@
 setup() {
   # This setup function is run before each test.
   # We create a consistent config.sh for all discord tests.
-  cat > config.sh <<'EOL'
+  mkdir -p config
+  cat > config/config.sh <<'EOL'
 # Test Configuration
 DISCORD_SERVER_ID='1400382194509287426'
 EOL
@@ -11,7 +12,7 @@ EOL
 
 teardown() {
   # This teardown function is run after each test.
-  rm -f config.sh
+  rm -rf config
 }
 
 @test "discord module (plain)" {
@@ -68,7 +69,7 @@ teardown() {
 
 @test "discord module with no server id" {
   # Overwrite the config.sh created by setup()
-  cat > config.sh <<'EOL'
+  cat > config/config.sh <<'EOL'
 # Test Configuration
 DISCORD_SERVER_ID=''
 EOL

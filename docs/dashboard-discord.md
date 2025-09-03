@@ -10,7 +10,7 @@ You can enable this in your server's settings: `Server Settings` > `Widget`. Mak
 
 ## Configuration
 
-To use this module, you must provide your Discord Server ID in the `DISCORD_SERVER_ID` variable in your `config.sh` file.
+To use this module, you must provide your Discord Server ID in the `DISCORD_SERVER_ID` variable in your `config/config.sh` file.
 
 ### Finding Your Server ID
 

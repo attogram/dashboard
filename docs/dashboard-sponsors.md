@@ -8,7 +8,7 @@ This module uses the official GitHub GraphQL API to retrieve your sponsor count.
 
 ## Configuration
 
-To use this module, you must provide a GitHub Personal Access Token (PAT) in the `GITHUB_TOKEN` variable in your `config.sh` file.
+To use this module, you must provide a GitHub Personal Access Token (PAT) in the `GITHUB_TOKEN` variable in your `config/config.sh` file.
 
 ### Creating a `GITHUB_TOKEN`
 
@@ -19,7 +19,7 @@ To use this module, you must provide a GitHub Personal Access Token (PAT) in the
 5.  Under "Select scopes", check the box for `read:user`. This will grant the necessary permissions to read your user profile data, including your sponsors.
 6.  Click "Generate token" at the bottom of the page.
 7.  **Important**: Copy the generated token immediately. You will not be able to see it again.
-8.  Paste the token into the `GITHUB_TOKEN` variable in your `config.sh` file.
+8.  Paste the token into the `GITHUB_TOKEN` variable in your `config/config.sh` file.
 
 ```bash
 # Example

@@ -22,4 +22,4 @@ ehthumbs_vista.db
 node_modules/
 
 # dashboard
-config.sh
+config/config.sh

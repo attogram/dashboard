@@ -3,7 +3,8 @@
 setup() {
   # This setup function is run before each test.
   # We create a consistent config.sh for all dashboard integration tests.
-  cat > config.sh <<'EOL'
+  mkdir -p config
+  cat > config/config.sh <<'EOL'
 # Test Configuration
 HN_USER='pg'
 GITHUB_USER='attogram'
@@ -18,7 +19,7 @@ EOL
 
 teardown() {
   # This teardown function is run after each test.
-  rm -f config.sh
+  rm -rf config
 }
 
 @test "dashboard.sh should be executable" {
@@ -32,7 +33,15 @@ teardown() {
 
 @test "dashboard.sh --help should show usage" {
   run ./dashboard.sh --help
+  echo "--- HELP OUTPUT ---"
+  echo "$output"
+  echo "--- END HELP OUTPUT ---"
   [ "${lines[0]}" = "Usage: dashboard.sh [options] [module]" ]
+  echo "$output" | grep -q "Available modules:"
+  echo "$output" | grep -q "crypto"
+  echo "$output" | grep -q "discord"
+  echo "$output" | grep -q "github"
+  echo "$output" | grep -q "hackernews"
 }
 
 # --- Integration Tests for Aggregated Output ---
@@ -78,13 +87,20 @@ teardown() {
   echo "$output" | grep -q "hackernews${tab}karma"
 }
 
-@test "integration: table output should gracefully fallback to tsv when column is missing" {
+@test "integration: table output should be a pretty ascii table" {
   run ./dashboard.sh --format table
   [ "$status" -eq 0 ]
-  [[ "$output" == *"'column' command not found. Falling back to tsv format."* ]]
-  [[ "$output" == *"Date${tab}module${tab}name${tab}value"* ]]
+  # Check for top border
+  [[ "${lines[0]}" == "+-"* ]]
+  # Check for header
+  [[ "${lines[1]}" == *"| Date"* ]]
+  # Check for separator
+  [[ "${lines[2]}" == "+-"* ]]
+  # Check for data
   echo "$output" | grep -q "hackernews"
   echo "$output" | grep -q "karma"
+  # Check for bottom border
+  [[ "${lines[-1]}" == "+-"* ]]
 }
 
 @test "integration: default output should be tsv" {

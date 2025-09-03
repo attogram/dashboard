@@ -42,11 +42,22 @@ _error() {
 }
 
 usage() {
+    echo "SCRIPT_DIR: $SCRIPT_DIR"
+    ls -l "${SCRIPT_DIR}/modules"
     echo "Usage: $(basename "$0") [options] [module]"
     echo "Options:"
     echo "  -f, --format <format>  Set the output format."
     echo "                         Supported formats: ${VALID_FORMATS[*]}"
     echo "  -h, --help             Display this help message."
+    echo
+    echo "Available modules:"
+    local modules=()
+    for module in "${SCRIPT_DIR}/modules"/*; do
+        if [ -x "$module" ]; then
+            modules+=("$(basename "$module" .sh)")
+        fi
+    done
+    echo "  ${modules[*]}"
     echo
     echo "If a module name (e.g., 'github') is provided, only that module will be run."
 }
@@ -93,12 +104,12 @@ fi
 
 
 _debug 'Load configuration'
-if [ -f "${SCRIPT_DIR}/config.sh" ]; then
-    # shellcheck source=config.sh
-    source "${SCRIPT_DIR}/config.sh"
+if [ -f "${SCRIPT_DIR}/config/config.sh" ]; then
+    # shellcheck source=config/config.sh
+    source "${SCRIPT_DIR}/config/config.sh"
 else
     _error "Error: Configuration file not found."
-    _error "Please copy config.dist.sh to config.sh and customize it."
+    _error "Please copy config/config.dist.sh to config/config.sh and customize it."
     exit 1
 fi
 
@@ -184,12 +195,63 @@ case "$FORMAT" in
         printf '%s\n' "${OUTPUTS[@]}"
         ;;
     table)
-        if ! command -v column &> /dev/null; then
-            _warn "'column' command not found. Falling back to tsv format."
+        if ! command -v awk &> /dev/null; then
+            _warn "'awk' command not found. Falling back to tsv format."
             echo -e "Date\tmodule\tname\tvalue"
             printf '%s\n' "${OUTPUTS[@]}"
         else
-            (echo -e "Date\tmodule\tname\tvalue"; printf '%s\n' "${OUTPUTS[@]}") | column -t -s $'\t'
+            (echo -e "Date\tmodule\tname\tvalue"; printf '%s\n' "${OUTPUTS[@]}") | awk '
+                BEGIN {
+                    FS="\t"
+                }
+                {
+                    for (i=1; i<=NF; i++) {
+                        if (length($i) > max[i]) {
+                            max[i] = length($i)
+                        }
+                        data[NR][i] = $i
+                    }
+                }
+                END {
+                    # Print top border
+                    for (i=1; i<=NF; i++) {
+                        printf "+-"
+                        for (j=1; j<=max[i]; j++) printf "-"
+                        printf "-"
+                    }
+                    printf "+\n"
+
+                    # Print header
+                    for (i=1; i<=NF; i++) {
+                        printf "| %-" max[i] "s ", data[1][i]
+                    }
+                    printf "|\n"
+
+                    # Print separator
+                    for (i=1; i<=NF; i++) {
+                        printf "+-"
+                        for (j=1; j<=max[i]; j++) printf "-"
+                        printf "-"
+                    }
+                    printf "+\n"
+
+                    # Print data
+                    for (row=2; row<=NR; row++) {
+                        for (i=1; i<=NF; i++) {
+                            printf "| %-" max[i] "s ", data[row][i]
+                        }
+                        printf "|\n"
+                    }
+
+                    # Print bottom border
+                    for (i=1; i<=NF; i++) {
+                        printf "+-"
+                        for (j=1; j<=max[i]; j++) printf "-"
+                        printf "-"
+                    }
+                    printf "+\n"
+                }
+            '
         fi
         ;;
     *)

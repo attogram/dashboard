@@ -6,7 +6,7 @@ Modules are the heart of the Dashboard project. Each module is an independent, e
 
 - Each file in the `modules/` directory is treated as a module.
 - The main `dashboard.sh` script executes each module and passes the desired output format as the first command-line argument (e.g., `json`, `plain`).
-- Modules must source the `config.sh` file to access the necessary configuration variables. The path to the config file can be found relative to the module script's own location.
+- Modules must source the `config/config.sh` file to access the necessary configuration variables. The path to the config file can be found relative to the module script's own location.
 - Modules should be written in Bash and be compatible with version 3.2.
 - Each module is responsible for its own data fetching (using `curl`) and parsing (using `jq`).
 
@@ -26,7 +26,7 @@ To add a new service to the dashboard, you can create a new module file in the `
 
 # Find and load the main config file
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_FILE="${SCRIPT_DIR}/../config.sh"
+CONFIG_FILE="${SCRIPT_DIR}/../config/config.sh"
 
 if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
@@ -82,4 +82,4 @@ esac
 
 ### GitHub Module (`modules/github.sh`)
 
-The `github` module fetches statistics for specified repositories. To ensure it works reliably, you should provide a GitHub Personal Access Token (PAT) via the `GITHUB_TOKEN` variable in your `config.sh` file. This helps to avoid the strict rate limits imposed by the GitHub API on unauthenticated requests.
+The `github` module fetches statistics for specified repositories. To ensure it works reliably, you should provide a GitHub Personal Access Token (PAT) via the `GITHUB_TOKEN` variable in your `config/config.sh` file. This helps to avoid the strict rate limits imposed by the GitHub API on unauthenticated requests.
