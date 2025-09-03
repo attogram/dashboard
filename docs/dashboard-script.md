@@ -23,7 +23,7 @@ The script follows these steps during execution:
 
 1.  **Argument Parsing**: It first parses any command-line options and arguments to determine the desired output format and whether to run a single module or all of them.
 
-2.  **Configuration Loading**: It checks for the existence of `config.sh`. If the file is not found, it will print an error message and exit. If found, it will source the file to load all the user-defined variables into the script's environment.
+2.  **Configuration Loading**: It checks for the existence of `config/config.sh`. If the file is not found, it will print an error message and exit. If found, it will source the file to load all the user-defined variables into the script's environment.
 
 3.  **Dependency Check**: It verifies that the required command-line tools, `curl` and `jq`, are installed and available in the system's `PATH`. If a dependency is missing, it will exit with an error.
 
