@@ -95,6 +95,27 @@ hackernews,karma,20
 
 ---
 
+### `tsv`
+
+Tab-separated values, similar to CSV but using tabs as delimiters. The format is `Date\tmodule\tname\tvalue`.
+
+```tsv
+2025-09-03T14:48:11Z	hackernews	karma	20
+```
+
+---
+
+### `table`
+
+A human-readable ASCII table, generated from the TSV data.
+
+```
+Date                  module      name   value
+2025-09-03T14:48:20Z  hackernews  karma  20
+```
+
+---
+
 ### `markdown`
 
 A GitHub-flavored Markdown document.

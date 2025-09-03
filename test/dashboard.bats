@@ -13,6 +13,7 @@ GITHUB_TOKEN=''
 CRYPTO_WALLET_BTC='1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
 CRYPTO_WALLET_ETH='0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae'
 EOL
+  tab=$(printf '\t')
 }
 
 teardown() {
@@ -68,4 +69,27 @@ teardown() {
   [ "${lines[0]}" = "module,key,value" ]
   echo "$output" | grep -q "hackernews,karma"
   echo "$output" | grep -q "github,base,stars"
+}
+
+@test "integration: tsv output should contain headers and module data" {
+  run ./dashboard.sh --format tsv
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = "Date${tab}module${tab}name${tab}value" ]
+  echo "$output" | grep -q "hackernews${tab}karma"
+}
+
+@test "integration: table output should gracefully fallback to tsv when column is missing" {
+  run ./dashboard.sh --format table
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"'column' command not found. Falling back to tsv format."* ]]
+  [[ "$output" == *"Date${tab}module${tab}name${tab}value"* ]]
+  echo "$output" | grep -q "hackernews"
+  echo "$output" | grep -q "karma"
+}
+
+@test "integration: default output should be tsv" {
+  run ./dashboard.sh
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = "Date${tab}module${tab}name${tab}value" ]
+  echo "$output" | grep -q "hackernews${tab}karma"
 }

@@ -20,9 +20,9 @@ DASHBOARD_COPYRIGHT='Copyright (c) 2025 Attogram Project <https://github.com/att
 DASHBOARD_DEBUG=0 # 0 = off, 1 = on
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-FORMAT="plain"
+FORMAT="tsv"
 MODULE_TO_RUN=""
-VALID_FORMATS=("plain" "pretty" "json" "xml" "html" "yaml" "csv" "markdown" "tsv")
+VALID_FORMATS=("plain" "pretty" "json" "xml" "html" "yaml" "csv" "markdown" "tsv" "table")
 
 _debug() {
   (( DASHBOARD_DEBUG )) || return 0
@@ -86,6 +86,11 @@ if ! [[ " ${VALID_FORMATS[*]} " =~ " ${FORMAT} " ]]; then
     exit 1
 fi
 
+MODULE_EXEC_FORMAT=$FORMAT
+if [ "$FORMAT" = "table" ]; then
+    MODULE_EXEC_FORMAT="tsv"
+fi
+
 
 _debug 'Load configuration'
 if [ -f "${SCRIPT_DIR}/config.sh" ]; then
@@ -145,7 +150,7 @@ _debug 'Collect output from all modules'
 OUTPUTS=()
 for module_name in "${MODULES_TO_RUN[@]}"; do
     _debug "Calling $module_name"
-    module_output=$("$MODULES_DIR/$module_name" "$FORMAT")
+    module_output=$("$MODULES_DIR/$module_name" "$MODULE_EXEC_FORMAT")
     if [ -n "$module_output" ]; then
         _debug "Saving output from $module_name: $(echo "$module_output" | wc -c | tr -d ' ') bytes"
         OUTPUTS+=("$module_output")
@@ -177,6 +182,15 @@ case "$FORMAT" in
     tsv)
         echo -e "Date\tmodule\tname\tvalue"
         printf '%s\n' "${OUTPUTS[@]}"
+        ;;
+    table)
+        if ! command -v column &> /dev/null; then
+            _warn "'column' command not found. Falling back to tsv format."
+            echo -e "Date\tmodule\tname\tvalue"
+            printf '%s\n' "${OUTPUTS[@]}"
+        else
+            (echo -e "Date\tmodule\tname\tvalue"; printf '%s\n' "${OUTPUTS[@]}") | column -t -s $'\t'
+        fi
         ;;
     *)
         # For plain, pretty, yaml, markdown, just print the outputs

@@ -87,7 +87,7 @@ case "$FORMAT" in
         ;;
         tsv)
             now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            printf "%s\thackernews\thackernews.karma\t%s\n" "$now" "$KARMA"
+            printf "%s\thackernews\tkarma\t%s\n" "$now" "$KARMA"
             ;;
     markdown)
         echo "### Hacker News"
