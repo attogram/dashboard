@@ -46,7 +46,7 @@ Date    module    name    value
 ## Features
 
 - **Modular Architecture**: Easily add new services by creating new module scripts. Run a full report or just a single module.
-- **Multiple Output Formats**: Supports `plain`, `pretty` (with colors), `json`, `xml`, `html`, `yaml`, `csv`, and `markdown`.
+- **Multiple Output Formats**: Supports `plain`, `pretty` (with colors), `json`, `xml`, `html`, `yaml`, `csv`, `tsv`, `table`, and `markdown`.
 - **Configurable**: All settings are controlled via a simple `config/config.sh` file.
 - **Minimal Dependencies**: Requires only `curl` and `jq` to run.
 - **Bash v3.2+ Compatible**: Written in pure Bash for maximum compatibility.
@@ -78,7 +78,7 @@ Date    module    name    value
 
 ### Usage
 
-To run a full report in the default `plain` format:
+To run a full report in the default `tsv` format:
 
 ```bash
 ./dashboard.sh
@@ -89,6 +89,16 @@ To specify an output format, use the `-f` or `--format` flag:
 ```bash
 ./dashboard.sh --format pretty
 ./dashboard.sh -f json
+```
+
+To save the report to a specific file or directory, use the `-o` or `--output` flag:
+
+```bash
+# Save to a specific file
+./dashboard.sh -o my_report.tsv
+
+# Save to a directory (a timestamped filename will be generated)
+./dashboard.sh -o reports/
 ```
 
 To run only a specific module:

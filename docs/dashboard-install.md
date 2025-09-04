@@ -67,4 +67,4 @@ brew install jq
     ./dashboard.sh
     ```
 
-    By default, this will run a full report in the `plain` text format. To learn about the different output formats and how to run specific modules, see the [Main Script Guide](./dashboard-script.md).
+    By default, this will run a full report in the `tsv` text format. To learn about the different output formats and how to run specific modules, see the [Main Script Guide](./dashboard-script.md).
