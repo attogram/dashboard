@@ -10,7 +10,8 @@ The `dashboard.sh` script is the main entry point for the application. It serves
 
 ### Options
 
-- `-f, --format <format>`: Specify the output format. See [Output Formats](./dashboard-output-formats.md) for a full list of supported formats. If not provided, the default is `plain`.
+- `-f, --format <format>`: Specify the output format. See [Output Formats](./dashboard-output-formats.md) for a full list of supported formats. If not provided, the default is `tsv`.
+- `-o, --output <path>`: Write the report to a specific file or directory. If a directory is provided, a timestamped filename will be automatically generated.
 - `-h, --help`: Display a help message with usage information and exit.
 
 ### Arguments

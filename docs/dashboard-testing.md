@@ -29,7 +29,7 @@ Each module has its own corresponding test file in the `test/` directory (e.g., 
 
 Module tests should:
 
-- Ensure the module produces the correct output for all 8 supported formats.
+- Ensure the module produces the correct output for all 10 supported formats.
 - Check that the module handles missing or invalid configuration gracefully.
 - Verify that the module exits with the correct status code in both success and failure cases.
 

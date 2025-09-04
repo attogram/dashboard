@@ -10,7 +10,7 @@ The core components of the architecture are:
 
 3.  **The Modules Directory (`modules/`)**: This directory contains an executable script for each service that the dashboard tracks. Each module is a self-contained script that is responsible for:
     - Fetching data from its specific service's API.
-    - Formatting the data into all of the 8 supported output formats.
+    - Formatting the data into all of the 10 supported output formats.
     - Being independently runnable.
 
 This separation of concerns allows for a clean and maintainable codebase. A developer can work on a single module without affecting the rest of the application. It also allows users to run a report for a single module if they wish.

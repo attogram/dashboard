@@ -25,7 +25,6 @@ The modular architecture makes it easy to add new services. Here are some ideas 
 
 - **Caching**: Implement a caching mechanism to avoid hitting API rate limits and to speed up report generation. The cache could be stored locally and have a configurable TTL.
 - **Historical Data / Sparklines**: Store historical data to be able to show trends over time, possibly with simple text-based sparklines in the `pretty` output format.
-- **More Output Formats**: Add support for other formats like `tsv` or even image-based reports.
 - **Plugin Manager**: A script to help users install and manage modules from a central repository.
 - **Improved Security for Secrets**: Read sensitive data like `GITHUB_TOKEN` from environment variables instead of a plain text configuration file to improve security.
 
