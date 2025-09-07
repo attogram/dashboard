@@ -83,11 +83,12 @@ case "$FORMAT" in
         echo "  karma: ${KARMA}"
         ;;
     csv)
-        echo "hackernews,karma,${KARMA}"
+        now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+        printf "%s,hackernews,hackernews,karma,%s\n" "$now" "$KARMA"
         ;;
         tsv)
             now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            printf "%s\thackernews\tkarma\t%s\n" "$now" "$KARMA"
+            printf "%s\thackernews\thackernews\tkarma\t%s\n" "$now" "$KARMA"
             ;;
     markdown)
         echo "### Hacker News"

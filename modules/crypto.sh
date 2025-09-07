@@ -194,12 +194,12 @@ case "$FORMAT" in
         echo "$DATA" | jq -r '.[] | "  - chain: \(.chain)\n    address: \(.address)\n    tokens:\n" + (.tokens[] | "      - symbol: \(.symbol)\n        balance: \"\(.balance)\"")'
         ;;
     csv)
-        echo 'module,chain,address,token_symbol,balance'
-        echo "$DATA" | jq -r '.[] | . as $parent | .tokens[] | "crypto,\($parent.chain),\($parent.address),\(.symbol),\(.balance)"'
+        now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+        echo "$DATA" | jq -r --arg now "$now" '.[] | . as $parent | .tokens[] | [$now, "crypto", "crypto", $parent.chain + "." + $parent.address + "." + .symbol, .balance] | @csv'
         ;;
         tsv)
             now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            echo "$DATA" | jq -r --arg now "$now" '.[] | . as $parent | .tokens[] | [$now, "crypto", "crypto." + $parent.chain + "." + $parent.address + "." + .symbol, .balance] | @tsv'
+            echo "$DATA" | jq -r --arg now "$now" '.[] | . as $parent | .tokens[] | [$now, "crypto", "crypto", $parent.chain + "." + $parent.address + "." + .symbol, .balance] | @tsv'
             ;;
     markdown)
         echo '### Crypto Donations'

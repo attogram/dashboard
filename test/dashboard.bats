@@ -26,8 +26,8 @@ EOL
   [ -n "$report_file" ]
   # Check content
   content=$(cat "$report_file")
-  [[ "$content" == *"Date${tab}module${tab}name${tab}value"* ]]
-  [[ "$content" == *"hackernews${tab}karma"* ]]
+  [[ "$content" == *"date${tab}module${tab}channels${tab}namespace${tab}value"* ]]
+  [[ "$content" == *"hackernews${tab}hackernews${tab}karma"* ]]
   rm -r reports
 }
 
@@ -36,7 +36,7 @@ EOL
   [ "$status" -eq 0 ]
   [ -f "my_report.tsv" ]
   content=$(cat "my_report.tsv")
-  [[ "$content" == *"Date${tab}module${tab}name${tab}value"* ]]
+  [[ "$content" == *"date${tab}module${tab}channels${tab}namespace${tab}value"* ]]
   rm my_report.tsv
 }
 
@@ -47,7 +47,7 @@ EOL
   report_file=$(find my_reports -type f -name "*.tsv")
   [ -n "$report_file" ]
   content=$(cat "$report_file")
-  [[ "$content" == *"Date${tab}module${tab}name${tab}value"* ]]
+  [[ "$content" == *"date${tab}module${tab}channels${tab}namespace${tab}value"* ]]
   rm -r my_reports
 }
 
@@ -109,16 +109,16 @@ teardown() {
 @test "integration: csv output should contain headers and module data" {
   run ./dashboard.sh --format csv -o /dev/stdout
   [ "$status" -eq 0 ]
-  [ "${lines[0]}" = "module,key,value" ]
-  echo "$output" | grep -q "hackernews,karma"
-  echo "$output" | grep -q "github,base,stars"
+  [ "${lines[0]}" = "date,module,channels,namespace,value" ]
+  echo "$output" | grep -q "hackernews,hackernews,karma"
+  echo "$output" | grep -q "github,repo,attogram.base.stars"
 }
 
 @test "integration: tsv output should contain headers and module data" {
   run ./dashboard.sh --format tsv -o /dev/stdout
   [ "$status" -eq 0 ]
-  [ "${lines[0]}" = "Date${tab}module${tab}name${tab}value" ]
-  echo "$output" | grep -q "hackernews${tab}karma"
+  [ "${lines[0]}" = "date${tab}module${tab}channels${tab}namespace${tab}value" ]
+  echo "$output" | grep -q "hackernews${tab}hackernews${tab}karma"
 }
 
 @test "integration: table output should be a pretty ascii table" {
@@ -127,7 +127,7 @@ teardown() {
   # Check for top border
   [[ "${lines[0]}" == "+-"* ]]
   # Check for header
-  [[ "${lines[1]}" == *"| Date"* ]]
+  [[ "${lines[1]}" == *"| date"* ]]
   # Check for separator
   [[ "${lines[2]}" == "+-"* ]]
   # Check for data

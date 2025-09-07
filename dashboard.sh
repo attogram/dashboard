@@ -190,20 +190,20 @@ generate_report() {
             echo "</body></html>"
             ;;
         csv)
-            echo "module,key,value"
+            echo "date,module,channels,namespace,value"
             printf '%s\n' "${OUTPUTS[@]}"
             ;;
         tsv)
-            echo -e "Date\tmodule\tname\tvalue"
+            echo -e "date\tmodule\tchannels\tnamespace\tvalue"
             printf '%s\n' "${OUTPUTS[@]}"
             ;;
         table)
             if ! command -v awk &> /dev/null; then
                 _warn "'awk' command not found. Falling back to tsv format."
-                echo -e "Date\tmodule\tname\tvalue"
+                echo -e "date\tmodule\tchannels\tnamespace\tvalue"
                 printf '%s\n' "${OUTPUTS[@]}"
             else
-                (echo -e "Date\tmodule\tname\tvalue"; printf '%s\n' "${OUTPUTS[@]}") | awk '
+                (echo -e "date\tmodule\tchannels\tnamespace\tvalue"; printf '%s\n' "${OUTPUTS[@]}") | awk '
                     BEGIN {
                         FS="\t"
                     }
