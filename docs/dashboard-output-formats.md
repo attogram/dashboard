@@ -8,10 +8,10 @@ Below are examples of the output from the `hackernews` module for each supported
 
 ### `tsv` (Default)
 
-Tab-separated values, similar to CSV but using tabs as delimiters. The format is `Date\tmodule\tname\tvalue`.
+Tab-separated values, similar to CSV but using tabs as delimiters. The format is `date\tmodule\tchannels\tnamespace\tvalue`.
 
 ```tsv
-2025-09-03T14:48:11Z	hackernews	karma	20
+2025-09-03T14:48:11Z	hackernews	karma	pg	20
 ```
 
 ---
@@ -97,10 +97,10 @@ hackernews:
 
 ### `csv`
 
-Comma-separated values suitable for spreadsheets. The format is `module,key,value`. For modules with nested data, there will be multiple rows.
+Comma-separated values suitable for spreadsheets. The format is `date,module,channels,namespace,value`. For modules with nested data, there will be multiple rows.
 
 ```csv
-hackernews,karma,20
+2025-09-03T14:48:11Z,hackernews,karma,pg,20
 ```
 
 ---
@@ -112,8 +112,8 @@ hackernews,karma,20
 A human-readable ASCII table, generated from the TSV data.
 
 ```
-Date                  module      name   value
-2025-09-03T14:48:20Z  hackernews  karma  20
+date                  module      channels    namespace   value
+2025-09-03T14:48:20Z  hackernews  karma       pg          20
 ```
 
 ---

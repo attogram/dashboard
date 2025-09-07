@@ -75,8 +75,11 @@ teardown() {
 @test "github module (csv)" {
   run ./modules/github.sh csv
   [ "$status" -eq 0 ]
-  [[ "$output" =~ "github,base,stars," ]]
-  [[ "$output" =~ "github,2048-lite,stars," ]]
+  for line in "${lines[@]}"; do
+    [[ "$line" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z,github,(stars|forks|open_issues|watchers),repo\.attogram\.(base|2048-lite),([0-9]+|null)$ ]]
+  done
+  [[ "$output" =~ "repo.attogram.base" ]]
+  [[ "$output" =~ "repo.attogram.2048-lite" ]]
 }
 
 @test "github module (markdown)" {
@@ -92,8 +95,8 @@ teardown() {
   run ./modules/github.sh tsv
   [ "$status" -eq 0 ]
   for line in "${lines[@]}"; do
-    [[ "$line" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z${tab}github${tab}.*${tab}([0-9]+|null)$ ]]
+    [[ "$line" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z${tab}github${tab}(stars|forks|open_issues|watchers)${tab}repo\.attogram\.(base|2048-lite)${tab}([0-9]+|null)$ ]]
   done
-  echo "$output" | grep -q "base.stars"
-  echo "$output" | grep -q "2048-lite.stars"
+  echo "$output" | grep -q "repo.attogram.base"
+  echo "$output" | grep -q "repo.attogram.2048-lite"
 }

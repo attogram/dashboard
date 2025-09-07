@@ -125,18 +125,19 @@ fetch_repo_data() {
             echo "    watchers: ${watchers}"
             ;;
         csv)
-            echo "github,${repo_name},stars,${stars}"
-            echo "github,${repo_name},forks,${forks}"
-            echo "github,${repo_name},issues,${issues}"
-            echo "github,${repo_name},watchers,${watchers}"
+            now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            printf "%s,github,stars,repo.%s.%s,%s\n" "$now" "$GITHUB_USER" "$repo_name" "$stars"
+            printf "%s,github,forks,repo.%s.%s,%s\n" "$now" "$GITHUB_USER" "$repo_name" "$forks"
+            printf "%s,github,open_issues,repo.%s.%s,%s\n" "$now" "$GITHUB_USER" "$repo_name" "$issues"
+            printf "%s,github,watchers,repo.%s.%s,%s\n" "$now" "$GITHUB_USER" "$repo_name" "$watchers"
             ;;
         tsv)
             local now
             now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            printf "%s\tgithub\trepo.%s.%s.stars\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$stars"
-            printf "%s\tgithub\trepo.%s.%s.forks\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$forks"
-            printf "%s\tgithub\trepo.%s.%s.open_issues\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$issues"
-            printf "%s\tgithub\trepo.%s.%s.watchers\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$watchers"
+            printf "%s\tgithub\tstars\trepo.%s.%s\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$stars"
+            printf "%s\tgithub\tforks\trepo.%s.%s\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$forks"
+            printf "%s\tgithub\topen_issues\trepo.%s.%s\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$issues"
+            printf "%s\tgithub\twatchers\trepo.%s.%s\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$watchers"
             ;;
         markdown)
             echo "#### ${repo_name}"

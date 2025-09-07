@@ -58,7 +58,7 @@ teardown() {
 @test "discord module (csv)" {
   run ./modules/discord.sh csv
   [ "$status" -eq 0 ]
-  [[ "$output" =~ ^discord,online,[0-9]+$ ]]
+  [[ "$output" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z,discord,online,discord,[0-9]+$ ]]
 }
 
 @test "discord module (markdown)" {
@@ -71,7 +71,7 @@ teardown() {
 @test "discord module (tsv)" {
   run ./modules/discord.sh tsv
   [ "$status" -eq 0 ]
-  [[ "$output" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z${tab}discord${tab}discord.online${tab}[0-9]+$ ]]
+  [[ "$output" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z${tab}discord${tab}online${tab}discord${tab}[0-9]+$ ]]
 }
 
 @test "discord module with no server id" {

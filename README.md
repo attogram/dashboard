@@ -22,25 +22,25 @@ Dashboard is a modular, configurable, and robust Bash script that provides a con
 ```
 
 ```csv
-Date    module    name    value
-2025-09-01T20:28:46Z    discord    discord.online    3
-2025-09-01T20:28:46Z    github    repo.attogram.games.stars    135
-2025-09-01T20:28:46Z    github    repo.attogram.games.forks    68
-2025-09-01T20:28:46Z    github    repo.attogram.games.open_issues    1
-2025-09-01T20:28:46Z    github    repo.attogram.games.watchers    7
-2025-09-01T20:28:47Z    github    repo.attogram.EightQueens.stars    15
-2025-09-01T20:28:47Z    github    repo.attogram.EightQueens.forks    4
-2025-09-01T20:28:47Z    github    repo.attogram.EightQueens.open_issues    0
-2025-09-01T20:28:47Z    github    repo.attogram.EightQueens.watchers    2
-2025-09-01T20:28:47Z    github    repo.attogram.base.stars    2
-2025-09-01T20:28:47Z    github    repo.attogram.base.forks    1
-2025-09-01T20:28:47Z    github    repo.attogram.base.open_issues    0
-2025-09-01T20:28:47Z    github    repo.attogram.base.watchers    2
-2025-09-01T20:28:48Z    github    repo.attogram.dashboard.stars    1
-2025-09-01T20:28:48Z    github    repo.attogram.dashboard.forks    0
-2025-09-01T20:28:48Z    github    repo.attogram.dashboard.open_issues    0
-2025-09-01T20:28:48Z    github    repo.attogram.dashboard.watchers    1
-2025-09-01T20:28:54Z    hackernews      hackernews.karma        30
+date    module    channels    namespace    value
+2025-09-01T20:28:46Z    discord    online    discord    3
+2025-09-01T20:28:46Z    github    stars    repo.attogram.games    135
+2025-09-01T20:28:46Z    github    forks    repo.attogram.games    68
+2025-09-01T20:28:46Z    github    open_issues    repo.attogram.games    1
+2025-09-01T20:28:46Z    github    watchers    repo.attogram.games    7
+2025-09-01T20:28:47Z    github    stars    repo.attogram.EightQueens    15
+2025-09-01T20:28:47Z    github    forks    repo.attogram.EightQueens    4
+2025-09-01T20:28:47Z    github    open_issues    repo.attogram.EightQueens    0
+2025-09-01T20:28:47Z    github    watchers    repo.attogram.EightQueens    2
+2025-09-01T20:28:47Z    github    stars    repo.attogram.base    2
+2025-09-01T20:28:47Z    github    forks    repo.attogram.base    1
+2025-09-01T20:28:47Z    github    open_issues    repo.attogram.base    0
+2025-09-01T20:28:47Z    github    watchers    repo.attogram.base    2
+2025-09-01T20:28:48Z    github    stars    repo.attogram.dashboard    1
+2025-09-01T20:28:48Z    github    forks    repo.attogram.dashboard    0
+2025-09-01T20:28:48Z    github    open_issues    repo.attogram.dashboard    0
+2025-09-01T20:28:48Z    github    watchers    repo.attogram.dashboard    1
+2025-09-01T20:28:54Z    hackernews    karma    your_username_here    30
 ```
 
 ## Features
