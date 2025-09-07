@@ -195,12 +195,12 @@ case "$FORMAT" in
         ;;
     csv)
         now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-        echo "$DATA" | jq -r --arg now "$now" '.[] | . as $parent | .tokens[] | [$now, "crypto", "crypto", $parent.chain + "." + $parent.address + "." + .symbol, .balance] | @csv'
+        echo "$DATA" | jq -r --arg now "$now" '.[] | . as $parent | .tokens[] | [$now, "crypto", "balance", "crypto." + $parent.chain + "." + $parent.address + "." + .symbol, .balance] | @csv'
         ;;
-        tsv)
-            now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            echo "$DATA" | jq -r --arg now "$now" '.[] | . as $parent | .tokens[] | [$now, "crypto", "crypto", $parent.chain + "." + $parent.address + "." + .symbol, .balance] | @tsv'
-            ;;
+    tsv)
+        now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+        echo "$DATA" | jq -r --arg now "$now" '.[] | . as $parent | .tokens[] | [$now, "crypto", "balance", "crypto." + $parent.chain + "." + $parent.address + "." + .symbol, .balance] | @tsv'
+        ;;
     markdown)
         echo '### Crypto Donations'
         echo "$DATA" | jq -r '.[] | "*   **\(.chain)** (`\(.address)`)\n" + (.tokens[] | "    *   **\(.symbol)**: \(.balance)")'

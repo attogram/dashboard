@@ -96,11 +96,11 @@ case "$FORMAT" in
         ;;
     csv)
         now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-        printf "%s,github-sponsors,github-sponsors,sponsors,%s\n" "$now" "$SPONSORS_COUNT"
+        printf "%s,github-sponsors,sponsors,github-sponsors,%s\n" "$now" "$SPONSORS_COUNT"
         ;;
         tsv)
             now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            printf "%s\tgithub-sponsors\tgithub-sponsors\tsponsors\t%s\n" "$now" "$SPONSORS_COUNT"
+            printf "%s\tgithub-sponsors\tsponsors\tgithub-sponsors\t%s\n" "$now" "$SPONSORS_COUNT"
             ;;
     markdown)
         echo "### GitHub Sponsors"

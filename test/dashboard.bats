@@ -27,7 +27,7 @@ EOL
   # Check content
   content=$(cat "$report_file")
   [[ "$content" == *"date${tab}module${tab}channels${tab}namespace${tab}value"* ]]
-  [[ "$content" == *"hackernews${tab}hackernews${tab}karma"* ]]
+  [[ "$content" == *"hackernews${tab}karma${tab}pg"* ]]
   rm -r reports
 }
 
@@ -110,15 +110,15 @@ teardown() {
   run ./dashboard.sh --format csv -o /dev/stdout
   [ "$status" -eq 0 ]
   [ "${lines[0]}" = "date,module,channels,namespace,value" ]
-  echo "$output" | grep -q "hackernews,hackernews,karma"
-  echo "$output" | grep -q "github,repo,attogram.base.stars"
+  echo "$output" | grep -q "hackernews,karma,pg"
+  echo "$output" | grep -q "github,stars,repo.attogram.base"
 }
 
 @test "integration: tsv output should contain headers and module data" {
   run ./dashboard.sh --format tsv -o /dev/stdout
   [ "$status" -eq 0 ]
   [ "${lines[0]}" = "date${tab}module${tab}channels${tab}namespace${tab}value" ]
-  echo "$output" | grep -q "hackernews${tab}hackernews${tab}karma"
+  echo "$output" | grep -q "hackernews${tab}karma${tab}pg"
 }
 
 @test "integration: table output should be a pretty ascii table" {

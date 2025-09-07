@@ -86,11 +86,11 @@ case "$FORMAT" in
         ;;
     csv)
         now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-        printf "%s,discord,discord,online,%s\n" "$now" "$ONLINE_COUNT"
+        printf "%s,discord,online,discord,%s\n" "$now" "$ONLINE_COUNT"
         ;;
         tsv)
             now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            printf "%s\tdiscord\tdiscord\tonline\t%s\n" "$now" "$ONLINE_COUNT"
+            printf "%s\tdiscord\tonline\tdiscord\t%s\n" "$now" "$ONLINE_COUNT"
             ;;
     markdown)
         echo "### Discord"
