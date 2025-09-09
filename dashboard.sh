@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # dashboard.sh
 #
@@ -41,13 +41,18 @@ _error() {
   printf '[ERROR] %s\n' "$1" >&2
 }
 
+AGGREGATE=0
+
 usage() {
     echo "Usage: $(basename "$0") [options] [module]"
     echo "Options:"
+    echo "  -a, --aggregate          Generate a trend report from all .tsv files in the reports/ directory."
     echo "  -f, --format <format>    Set the output format."
     echo "                           Supported formats: ${VALID_FORMATS[*]}"
-    echo "  -o, --output <path>      Set the output file or directory."
     echo "  -h, --help               Display this help message."
+    echo
+    echo "To save a report, redirect the output to a file. Example:"
+    echo "  ./dashboard.sh > reports/my_report.tsv"
     echo
     echo "Available modules:"
     local modules=()
@@ -65,16 +70,15 @@ _debug "$DASHBOARD_NAME v$DASHBOARD_VERSION"
 
 _debug 'parsing command-line arguments'
 
-OUTPUT_PATH=""
 while [[ $# -gt 0 ]]; do
     key="$1"
     case $key in
+        -a|--aggregate)
+            AGGREGATE=1
+            shift
+            ;;
         -f|--format)
             FORMAT="$2"
-            shift 2
-            ;;
-        -o|--output)
-            OUTPUT_PATH="$2"
             shift 2
             ;;
         -h|--help)
@@ -128,49 +132,6 @@ if ! command -v jq &> /dev/null; then
 fi
 
 
-_debug 'Get list of modules to run'
-MODULES_DIR="${SCRIPT_DIR}/modules"
-MODULES_TO_RUN=()
-if [ -n "$MODULE_TO_RUN" ]; then
-    # If the user provides 'github', check for 'github.sh'
-    if [[ ! "$MODULE_TO_RUN" == *.sh ]]; then
-        MODULE_TO_RUN="${MODULE_TO_RUN}.sh"
-    fi
-    MODULE_PATH="${MODULES_DIR}/${MODULE_TO_RUN}"
-    if [ ! -x "$MODULE_PATH" ]; then
-        # If 'github.sh' is not found, try without the extension for backward compatibility
-        MODULE_TO_RUN_NO_EXT="${MODULE_TO_RUN%.sh}"
-        MODULE_PATH_NO_EXT="${MODULES_DIR}/${MODULE_TO_RUN_NO_EXT}"
-        if [ -x "$MODULE_PATH_NO_EXT" ]; then
-            MODULE_PATH="$MODULE_PATH_NO_EXT"
-            MODULE_TO_RUN="$MODULE_TO_RUN_NO_EXT"
-        else
-            _error "Error: Module '${MODULE_TO_RUN}' not found or not executable."
-            exit 1
-        fi
-    fi
-    MODULES_TO_RUN+=("$MODULE_TO_RUN")
-else
-    # Find all executable files in the modules directory, with or without .sh
-    for module in "${MODULES_DIR}"/*; do
-        if [ -x "$module" ]; then
-            MODULES_TO_RUN+=("$(basename "$module")")
-        fi
-    done
-fi
-
-_debug "MODULES_TO_RUN: ${MODULES_TO_RUN[*]}"
-
-_debug 'Collect output from all modules'
-OUTPUTS=()
-for module_name in "${MODULES_TO_RUN[@]}"; do
-    _debug "Calling $module_name"
-    module_output=$("$MODULES_DIR/$module_name" "$MODULE_EXEC_FORMAT")
-    if [ -n "$module_output" ]; then
-        _debug "Saving output from $module_name: $(echo "$module_output" | wc -c | tr -d ' ') bytes"
-        OUTPUTS+=("$module_output")
-    fi
-done
 
 generate_report() {
     case "$FORMAT" in
@@ -264,31 +225,105 @@ generate_report() {
     esac
 }
 
-FINAL_OUTPUT_FILE=""
-if [ -n "$OUTPUT_PATH" ]; then
-    if [ -d "$OUTPUT_PATH" ]; then
-        # User provided a directory
-        REPORTS_DIR="$OUTPUT_PATH"
-        TIMESTAMP=$(date +"%Y-%m-%d-%H-%M")
-        FINAL_OUTPUT_FILE="${REPORTS_DIR}/${TIMESTAMP}.${FORMAT}"
-    else
-        # User provided a file path
-        FINAL_OUTPUT_FILE="$OUTPUT_PATH"
+aggregate_reports() {
+    local reports_dir="${SCRIPT_DIR}/reports"
+    _debug "Aggregating reports from ${reports_dir}"
+    if ! command -v awk &> /dev/null; then
+        _error "'awk' command not found, which is required for aggregation."
+        exit 1
     fi
-else
-    # Default behavior
-    REPORTS_DIR="${SCRIPT_DIR}/reports"
-    mkdir -p "$REPORTS_DIR"
-    TIMESTAMP=$(date +"%Y-%m-%d-%H-%M")
-    FINAL_OUTPUT_FILE="${REPORTS_DIR}/${TIMESTAMP}.${FORMAT}"
-fi
 
-_debug "Assemble the final report: FORMAT: $FORMAT"
-_debug "Output file: $FINAL_OUTPUT_FILE"
+    local report_files
+    report_files=$(find "$reports_dir" -name "*.tsv" 2>/dev/null | sort)
+    if [ -z "$report_files" ]; then
+        _warn "No .tsv reports found in ${reports_dir} to aggregate."
+        return
+    fi
 
-if [ -n "$FINAL_OUTPUT_FILE" ]; then
-    generate_report > "$FINAL_OUTPUT_FILE"
+    # Use awk to process the tsv files
+    # We pass the report files to awk, which will process them in alphabetical order.
+    # Since the filenames start with a timestamp, this will process them in chronological order.
+    awk '
+    BEGIN {
+        FS="\t";
+        OFS="\t";
+        print "Metric\tFirst Value\tLast Value\tChange";
+        print "------\t-----------\t----------\t------";
+    }
+    FNR == 1 { next; } # Skip header row of each file
+    {
+        metric = $2 OFS $3 OFS $4; # module, channel, namespace
+        value = $5;
+        if (!(metric in first_value)) {
+            first_value[metric] = value;
+        }
+        last_value[metric] = value;
+    }
+    END {
+        for (metric in last_value) {
+            change = last_value[metric] - first_value[metric];
+            # Add a plus sign for positive changes
+            if (change > 0) {
+                change_str = "+" change;
+            } else {
+                change_str = change;
+            }
+            print metric, first_value[metric], last_value[metric], change_str;
+        }
+    }' $report_files
+}
+
+# --- Main Execution Flow ----------------------------------------------------
+
+if [ "$AGGREGATE" -eq 1 ]; then
+    aggregate_reports
 else
+    # --- Module Data Collection ---------------------------------------------
+    _debug 'Get list of modules to run'
+    MODULES_DIR="${SCRIPT_DIR}/modules"
+    MODULES_TO_RUN=()
+    if [ -n "$MODULE_TO_RUN" ]; then
+        # If the user provides 'github', check for 'github.sh'
+        if [[ ! "$MODULE_TO_RUN" == *.sh ]]; then
+            MODULE_TO_RUN="${MODULE_TO_RUN}.sh"
+        fi
+        MODULE_PATH="${MODULES_DIR}/${MODULE_TO_RUN}"
+        if [ ! -x "$MODULE_PATH" ]; then
+            # If 'github.sh' is not found, try without the extension for backward compatibility
+            MODULE_TO_RUN_NO_EXT="${MODULE_TO_RUN%.sh}"
+            MODULE_PATH_NO_EXT="${MODULES_DIR}/${MODULE_TO_RUN_NO_EXT}"
+            if [ -x "$MODULE_PATH_NO_EXT" ]; then
+                MODULE_PATH="$MODULE_PATH_NO_EXT"
+                MODULE_TO_RUN="$MODULE_TO_RUN_NO_EXT"
+            else
+                _error "Error: Module '${MODULE_TO_RUN}' not found or not executable."
+                exit 1
+            fi
+        fi
+        MODULES_TO_RUN+=("$MODULE_TO_RUN")
+    else
+        # Defined order of execution
+        ORDERED_MODULES=("github.sh" "hackernews.sh" "discord.sh" "github-sponsors.sh" "crypto.sh")
+        for module in "${ORDERED_MODULES[@]}"; do
+            if [ -x "${MODULES_DIR}/${module}" ]; then
+                MODULES_TO_RUN+=("$module")
+            fi
+        done
+    fi
+
+    _debug "MODULES_TO_RUN: ${MODULES_TO_RUN[*]}"
+
+    _debug 'Collect output from all modules'
+    OUTPUTS=()
+    for module_name in "${MODULES_TO_RUN[@]}"; do
+        _debug "Calling $module_name"
+        module_output=$("$MODULES_DIR/$module_name" "$MODULE_EXEC_FORMAT")
+        if [ -n "$module_output" ]; then
+            _debug "Saving output from $module_name: $(echo "$module_output" | wc -c | tr -d ' ') bytes"
+            OUTPUTS+=("$module_output")
+        fi
+    done
+
     generate_report
 fi
 
