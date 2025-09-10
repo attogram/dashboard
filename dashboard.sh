@@ -146,10 +146,7 @@ else
         exit 1
     fi
 
-    MODULE_EXEC_FORMAT=$FORMAT
-    if [ "$FORMAT" = "table" ]; then
-        MODULE_EXEC_FORMAT="tsv"
-    fi
+    MODULE_EXEC_FORMAT="tsv"
 
     _debug 'Load configuration'
     if [ -f "${SCRIPT_DIR}/config/config.sh" ]; then
@@ -172,37 +169,26 @@ else
     fi
 
     generate_report() {
+        # The OUTPUTS array contains TSV data from the modules.
+        # We now format it based on the user's requested FORMAT.
+
+        # First, combine all output into a single string with a header.
+        local all_tsv_data
+        all_tsv_data=$(echo -e "date\tmodule\tchannels\tnamespace\tvalue"; printf '%s\n' "${OUTPUTS[@]}")
+
         case "$FORMAT" in
-            json)
-                echo "{"
-                printf '%s,' "${OUTPUTS[@]}" | sed 's/,$//'
-                echo "}"
-                ;;
-            xml)
-                echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><dashboard>"
-                printf '%s\n' "${OUTPUTS[@]}"
-                echo "</dashboard>"
-                ;;
-            html)
-                echo "<!DOCTYPE html><html><head><title>Dashboard</title></head><body>"
-                printf '%s\n' "${OUTPUTS[@]}"
-                echo "</body></html>"
+            tsv)
+                echo "$all_tsv_data"
                 ;;
             csv)
-                echo "date,module,channels,namespace,value"
-                printf '%s\n' "${OUTPUTS[@]}"
-                ;;
-            tsv)
-                echo -e "date\tmodule\tchannels\tnamespace\tvalue"
-                printf '%s\n' "${OUTPUTS[@]}"
+                echo "$all_tsv_data" | sed 's/\t/,/g'
                 ;;
             table)
                 if ! command -v awk &> /dev/null; then
                     _warn "'awk' command not found. Falling back to tsv format."
-                    echo -e "date\tmodule\tchannels\tnamespace\tvalue"
-                    printf '%s\n' "${OUTPUTS[@]}"
+                    echo "$all_tsv_data"
                 else
-                    (echo -e "date\tmodule\tchannels\tnamespace\tvalue"; printf '%s\n' "${OUTPUTS[@]}") | awk '
+                    echo "$all_tsv_data" | awk '
                         BEGIN {
                             FS="\t"
                         }
@@ -256,9 +242,51 @@ else
                     '
                 fi
                 ;;
+            json)
+                if ! command -v awk &> /dev/null; then
+                     _warn "'awk' command not found. Cannot generate JSON."
+                     return
+                fi
+                # Use jq to pretty-print if available, otherwise just output compact json
+                local json_output
+                json_output=$(echo "$all_tsv_data" | awk -F'\t' '
+                BEGIN {
+                    printf "["
+                }
+                NR > 1 { # Skip header
+                    if (NR > 2) { printf "," }
+                    gsub(/"/, "\\\"", $1); gsub(/"/, "\\\"", $2); gsub(/"/, "\\\"", $3); gsub(/"/, "\\\"", $4); gsub(/"/, "\\\"", $5);
+                    printf "{\"date\":\"%s\",\"module\":\"%s\",\"channels\":\"%s\",\"namespace\":\"%s\",\"value\":\"%s\"}", $1, $2, $3, $4, $5
+                }
+                END {
+                    printf "]"
+                }')
+                if command -v jq &> /dev/null; then
+                    echo "$json_output" | jq .
+                else
+                    echo "$json_output"
+                fi
+                ;;
+            xml)
+                echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><dashboard>"
+                echo "$all_tsv_data" | awk -F'\t' '
+                NR > 1 { # Skip header
+                    printf "<metric><date>%s</date><module>%s</module><channels>%s</channels><namespace>%s</namespace><value>%s</value></metric>\n", $1, $2, $3, $4, $5
+                }'
+                echo "</dashboard>"
+                ;;
+            html)
+                 echo "<!DOCTYPE html><html><head><title>Dashboard</title></head><body><table>"
+                 echo "<tr><th>Date</th><th>Module</th><th>Channels</th><th>Namespace</th><th>Value</th></tr>"
+                 echo "$all_tsv_data" | awk -F'\t' '
+                 NR > 1 { # Skip header
+                    printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5
+                 }'
+                 echo "</table></body></html>"
+                 ;;
             *)
-                # For plain, pretty, yaml, markdown, just print the outputs
-                printf '%s\n' "${OUTPUTS[@]}"
+                # For plain, pretty, yaml, markdown, just show the TSV for now.
+                echo "$all_tsv_data"
                 ;;
         esac
     }
