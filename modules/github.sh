@@ -86,11 +86,19 @@ fetch_repo_data() {
     local forks
     local issues
     local watchers
+    local open_prs
+    local closed_prs
 
     stars=$(echo "$api_response" | jq -r '.stargazers_count')
     forks=$(echo "$api_response" | jq -r '.forks_count')
     issues=$(echo "$api_response" | jq -r '.open_issues_count')
     watchers=$(echo "$api_response" | jq -r '.subscribers_count')
+
+    # Fetch PR counts using the search API to be more efficient
+    local search_api_url="https://api.github.com/search/issues?q=is:pr+repo:${GITHUB_USER}/${repo_name}"
+    open_prs=$(curl -s "${curl_headers[@]}" "${search_api_url}+is:open" | jq -r '.total_count')
+    closed_prs=$(curl -s "${curl_headers[@]}" "${search_api_url}+is:closed" | jq -r '.total_count')
+
 
     case "$format" in
         plain)
@@ -99,6 +107,8 @@ fetch_repo_data() {
             echo "    Forks: ${forks}"
             echo "    Open Issues: ${issues}"
             echo "    Watchers: ${watchers}"
+            echo "    Open PRs: ${open_prs}"
+            echo "    Closed PRs: ${closed_prs}"
             ;;
         pretty)
             echo -e "  \e[1m${repo_name}\e[0m:"
@@ -106,16 +116,18 @@ fetch_repo_data() {
             echo "    Forks: ${forks}"
             echo "    Open Issues: ${issues}"
             echo "    Watchers: ${watchers}"
+            echo "    Open PRs: ${open_prs}"
+            echo "    Closed PRs: ${closed_prs}"
             ;;
         json)
-            echo "\"${repo_name}\":{\"stars\":${stars},\"forks\":${forks},\"issues\":${issues},\"watchers\":${watchers}}"
+            echo "\"${repo_name}\":{\"stars\":${stars},\"forks\":${forks},\"issues\":${issues},\"watchers\":${watchers},\"open_prs\":${open_prs},\"closed_prs\":${closed_prs}}"
             ;;
         xml)
             xml_repo_name=$(echo "$repo_name" | sed 's/-/_/g' | sed 's/^[0-9]/_&/')
-            echo "<${xml_repo_name}><stars>${stars}</stars><forks>${forks}</forks><issues>${issues}</issues><watchers>${watchers}</watchers></${xml_repo_name}>"
+            echo "<${xml_repo_name}><stars>${stars}</stars><forks>${forks}</forks><issues>${issues}</issues><watchers>${watchers}</watchers><open_prs>${open_prs}</open_prs><closed_prs>${closed_prs}</closed_prs></${xml_repo_name}>"
             ;;
         html)
-            echo "<h3>${repo_name}</h3><ul><li>Stars: ${stars}</li><li>Forks: ${forks}</li><li>Open Issues: ${issues}</li><li>Watchers: ${watchers}</li></ul>"
+            echo "<h3>${repo_name}</h3><ul><li>Stars: ${stars}</li><li>Forks: ${forks}</li><li>Open Issues: ${issues}</li><li>Watchers: ${watchers}</li><li>Open PRs: ${open_prs}</li><li>Closed PRs: ${closed_prs}</li></ul>"
             ;;
         yaml)
             echo "  ${repo_name}:"
@@ -123,6 +135,8 @@ fetch_repo_data() {
             echo "    forks: ${forks}"
             echo "    issues: ${issues}"
             echo "    watchers: ${watchers}"
+            echo "    open_prs: ${open_prs}"
+            echo "    closed_prs: ${closed_prs}"
             ;;
         csv)
             now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
@@ -130,6 +144,8 @@ fetch_repo_data() {
             printf "%s,github,forks,repo.%s.%s,%s\n" "$now" "$GITHUB_USER" "$repo_name" "$forks"
             printf "%s,github,open_issues,repo.%s.%s,%s\n" "$now" "$GITHUB_USER" "$repo_name" "$issues"
             printf "%s,github,watchers,repo.%s.%s,%s\n" "$now" "$GITHUB_USER" "$repo_name" "$watchers"
+            printf "%s,github,open_prs,repo.%s.%s,%s\n" "$now" "$GITHUB_USER" "$repo_name" "$open_prs"
+            printf "%s,github,closed_prs,repo.%s.%s,%s\n" "$now" "$GITHUB_USER" "$repo_name" "$closed_prs"
             ;;
         tsv)
             local now
@@ -138,6 +154,8 @@ fetch_repo_data() {
             printf "%s\tgithub\tforks\trepo.%s.%s\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$forks"
             printf "%s\tgithub\topen_issues\trepo.%s.%s\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$issues"
             printf "%s\tgithub\twatchers\trepo.%s.%s\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$watchers"
+            printf "%s\tgithub\topen_prs\trepo.%s.%s\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$open_prs"
+            printf "%s\tgithub\tclosed_prs\trepo.%s.%s\t%s\n" "$now" "$GITHUB_USER" "$repo_name" "$closed_prs"
             ;;
         markdown)
             echo "#### ${repo_name}"
@@ -145,6 +163,8 @@ fetch_repo_data() {
             echo "- Forks: ${forks}"
             echo "- Open Issues: ${issues}"
             echo "- Watchers: ${watchers}"
+            echo "- Open PRs: ${open_prs}"
+            echo "- Closed PRs: ${closed_prs}"
             ;;
     esac
 }
