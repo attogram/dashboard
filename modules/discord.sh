@@ -18,7 +18,7 @@ else
     exit 1
 fi
 
-if [ -z "$DISCORD_SERVER_ID" ];
+if [ -z "$DISCORD_SERVER_ID" ]; then
     # This module is optional if no server ID is specified.
     exit 0
 fi

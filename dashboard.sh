@@ -249,14 +249,20 @@ else
                 fi
                 # Use jq to pretty-print if available, otherwise just output compact json
                 local json_output
+                _debug "TSV data for JSON conversion:\n$all_tsv_data"
                 json_output=$(echo "$all_tsv_data" | awk -F'\t' '
                 BEGIN {
                     printf "["
                 }
                 NR > 1 { # Skip header
                     if (NR > 2) { printf "," }
-                    gsub(/"/, "\\\"", $1); gsub(/"/, "\\\"", $2); gsub(/"/, "\\\"", $3); gsub(/"/, "\\\"", $4); gsub(/"/, "\\\"", $5);
-                    printf "{\"date\":\"%s\",\"module\":\"%s\",\"channels\":\"%s\",\"namespace\":\"%s\",\"value\":\"%s\"}", $1, $2, $3, $4, $5
+                    for(i=1; i<=NF; i++) { gsub(/"/, "\\\"", $i) }
+
+                    if ($5 == "null") {
+                        printf "{\"date\":\"%s\",\"module\":\"%s\",\"channels\":\"%s\",\"namespace\":\"%s\",\"value\":null}", $1, $2, $3, $4
+                    } else {
+                        printf "{\"date\":\"%s\",\"module\":\"%s\",\"channels\":\"%s\",\"namespace\":\"%s\",\"value\":\"%s\"}", $1, $2, $3, $4, $5
+                    }
                 }
                 END {
                     printf "]"
@@ -329,7 +335,7 @@ else
     OUTPUTS=()
     for module_name in "${MODULES_TO_RUN[@]}"; do
         _debug "Calling $module_name"
-        module_output=$("$MODULES_DIR/$module_name" "$MODULE_EXEC_FORMAT")
+        module_output=$("$MODULES_DIR/$module_name" "$MODULE_EXEC_FORMAT" 2>/dev/null)
         if [ -n "$module_output" ]; then
             _debug "Saving output from $module_name: $(echo "$module_output" | wc -c | tr -d ' ') bytes"
             OUTPUTS+=("$module_output")

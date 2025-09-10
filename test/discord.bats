@@ -6,81 +6,46 @@ setup() {
   mkdir -p config
   cat > config/config.sh <<'EOL'
 # Test Configuration
-DISCORD_SERVER_ID='1400382194509287426'
+DISCORD_SERVER_ID='123456789' # This ID is mocked
 EOL
   tab=$(printf '\t')
+
+  # Mock curl to return a fixed response for the Discord API
+  MOCK_DIR="/tmp/bats_mocks_$$"
+  mkdir -p "$MOCK_DIR"
+  export PATH="$MOCK_DIR:$PATH"
+  cat << 'EOF' > "$MOCK_DIR/curl"
+#!/bin/bash
+echo '{"presence_count": 123}'
+EOF
+  chmod +x "$MOCK_DIR/curl"
 }
 
 teardown() {
   # This teardown function is run after each test.
   rm -rf config
+  rm -rf "/tmp/bats_mocks_$$"
 }
 
-@test "discord module (plain)" {
-  run ./modules/discord.sh plain
+@test "discord module produces valid tsv" {
+  run ./modules/discord.sh
   [ "$status" -eq 0 ]
-  [ "${lines[0]}" = "Discord" ]
-  [[ "${lines[1]}" =~ ^Online:\ [0-9]+$ ]]
+
+  # Should be 1 line of output
+  [ "${#lines[@]}" -eq 1 ]
+
+  # Check that the line has 5 tab-separated columns
+  num_columns=$(echo "$output" | awk -F'\t' '{print NF}')
+  [ "$num_columns" -eq 5 ]
+
+  # Check the content of the line
+  [[ "$output" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z${tab}discord${tab}online${tab}discord${tab}123$ ]]
 }
 
-@test "discord module (pretty)" {
-  run ./modules/discord.sh pretty
+@test "discord module exits gracefully with no server id" {
+  # Overwrite config to have no DISCORD_SERVER_ID
+  echo "" > config/config.sh
+  run ./modules/discord.sh
   [ "$status" -eq 0 ]
-  [[ "$(echo ${lines[0]} | grep -o 'Discord')" = "Discord" ]]
-  [[ "${lines[1]}" =~ ^Online:\ [0-9]+$ ]]
-}
-
-@test "discord module (json)" {
-  run ./modules/discord.sh json
-  [ "$status" -eq 0 ]
-  echo "$output" | grep -q -E '^"discord":{"online":[0-9]+}$'
-}
-
-@test "discord module (xml)" {
-  run ./modules/discord.sh xml
-  [ "$status" -eq 0 ]
-  echo "$output" | grep -q -E '^<discord><online>[0-9]+</online></discord>$'
-}
-
-@test "discord module (html)" {
-  run ./modules/discord.sh html
-  [ "$status" -eq 0 ]
-  echo "$output" | grep -q -E '^<h2>Discord</h2><ul><li>Online: [0-9]+</li></ul>$'
-}
-
-@test "discord module (yaml)" {
-  run ./modules/discord.sh yaml
-  [ "$status" -eq 0 ]
-  [ "${lines[0]}" = "discord:" ]
-  [[ "${lines[1]}" =~ \ \ online:\ [0-9]+ ]]
-}
-
-@test "discord module (csv)" {
-  run ./modules/discord.sh csv
-  [ "$status" -eq 0 ]
-  [[ "$output" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z,discord,online,discord,[0-9]+$ ]]
-}
-
-@test "discord module (markdown)" {
-  run ./modules/discord.sh markdown
-  [ "$status" -eq 0 ]
-  [ "${lines[0]}" = "### Discord" ]
-  [[ "${lines[1]}" =~ ^-\ Online:\ [0-9]+$ ]]
-}
-
-@test "discord module (tsv)" {
-  run ./modules/discord.sh tsv
-  [ "$status" -eq 0 ]
-  [[ "$output" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z${tab}discord${tab}online${tab}discord${tab}[0-9]+$ ]]
-}
-
-@test "discord module with no server id" {
-  # Overwrite the config.sh created by setup()
-  cat > config/config.sh <<'EOL'
-# Test Configuration
-DISCORD_SERVER_ID=''
-EOL
-  run ./modules/discord.sh plain
-  [ "$status" -eq 0 ]
-  [ -z "$output" ] # Should produce no output
+  [ -z "$output" ] # Expect no output
 }
