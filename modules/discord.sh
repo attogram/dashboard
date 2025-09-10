@@ -3,10 +3,8 @@
 # modules/discord.sh
 #
 # Discord module for the dashboard.
-# Fetches online member count from a Discord server widget.
+# Fetches online member count from a Discord server widget and outputs it in TSV format.
 #
-
-#echo 'modules/discord.sh started'
 
 # --- Configuration and Setup ------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -23,13 +21,6 @@ fi
 if [ -z "$DISCORD_SERVER_ID" ]; then
     # This module is optional if no server ID is specified.
     exit 0
-fi
-
-# --- Input ------------------------------------------------------------------
-FORMAT="$1"
-if [ -z "$FORMAT" ]; then
-    echo "Usage: $(basename "$0") <format>" >&2
-    exit 1
 fi
 
 # --- Data Fetching ----------------------------------------------------------
@@ -62,42 +53,5 @@ if [ "$ONLINE_COUNT" == "null" ]; then
 fi
 
 # --- Output Formatting ------------------------------------------------------
-case "$FORMAT" in
-    plain)
-        echo "Discord"
-        echo "Online: $ONLINE_COUNT"
-        ;;
-    pretty)
-        echo -e "\e[1mDiscord\e[0m"
-        echo "Online: $ONLINE_COUNT"
-        ;;
-    json)
-        echo "\"discord\":{\"online\":${ONLINE_COUNT}}"
-        ;;
-    xml)
-        echo "<discord><online>${ONLINE_COUNT}</online></discord>"
-        ;;
-    html)
-        echo "<h2>Discord</h2><ul><li>Online: ${ONLINE_COUNT}</li></ul>"
-        ;;
-    yaml)
-        echo "discord:"
-        echo "  online: ${ONLINE_COUNT}"
-        ;;
-    csv)
-        now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-        printf "%s,discord,online,discord,%s\n" "$now" "$ONLINE_COUNT"
-        ;;
-        tsv)
-            now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            printf "%s\tdiscord\tonline\tdiscord\t%s\n" "$now" "$ONLINE_COUNT"
-            ;;
-    markdown)
-        echo "### Discord"
-        echo "- Online: ${ONLINE_COUNT}"
-        ;;
-    *)
-        echo "Error: Unsupported format '$FORMAT'" >&2
-        exit 1
-        ;;
-esac
+now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+printf "%s\tdiscord\tonline\tdiscord\t%s\n" "$now" "$ONLINE_COUNT"

@@ -2,7 +2,7 @@
 #
 # modules/crypto.sh
 #
-# Fetches crypto wallet balances using multiple providers.
+# Fetches crypto wallet balances using multiple providers and outputs them in TSV format.
 #
 
 # --- Configuration and Setup ---
@@ -10,13 +10,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${SCRIPT_DIR}/../config/config.sh"
 if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
-fi
-
-# --- Input ---
-FORMAT="$1"
-if [ -z "$FORMAT" ]; then
-    echo "Usage: $(basename "$0") <format>" >&2
-    exit 1
 fi
 
 # --- Data Fetching ---
@@ -170,43 +163,5 @@ fi
 DATA=$ALL_BALANCES_JSON
 
 # --- Output Formatting ---
-case "$FORMAT" in
-    plain | pretty)
-        echo 'Crypto Donations'
-        echo "$DATA" | jq -r '.[] | "\(.chain) (\(.address))\n" + (.tokens[] | "  - \(.symbol): \(.balance)")'
-        ;;
-    json)
-        echo "\"crypto\":${DATA}"
-        ;;
-    xml)
-        echo '<crypto>'
-        echo "$DATA" | jq -r '.[] | "  <wallet chain=\"\(.chain)\" address=\"\(.address)\">\n" + (.tokens[] | "    <token symbol=\"\(.symbol)\" balance=\"\(.balance)\"/>") + "\n  </wallet>"'
-        echo '</crypto>'
-        ;;
-    html)
-        echo '<h2>Crypto Donations</h2>'
-        echo '<ul>'
-        echo "$DATA" | jq -r '.[] | "  <li><b>\(.chain)</b> (<code>\(.address)</code>)<ul>" + (.tokens[] | "<li>\(.symbol): \(.balance)</li>") + "</ul></li>"'
-        echo '</ul>'
-        ;;
-    yaml)
-        echo 'crypto:'
-        echo "$DATA" | jq -r '.[] | "  - chain: \(.chain)\n    address: \(.address)\n    tokens:\n" + (.tokens[] | "      - symbol: \(.symbol)\n        balance: \"\(.balance)\"")'
-        ;;
-    csv)
-        now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-        echo "$DATA" | jq -r --arg now "$now" '.[] | . as $parent | .tokens[] | [$now, "crypto", "balance", "crypto." + $parent.chain + "." + $parent.address + "." + .symbol, .balance] | @csv'
-        ;;
-    tsv)
-        now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-        echo "$DATA" | jq -r --arg now "$now" '.[] | . as $parent | .tokens[] | [$now, "crypto", "balance", "crypto." + $parent.chain + "." + $parent.address + "." + .symbol, .balance] | @tsv'
-        ;;
-    markdown)
-        echo '### Crypto Donations'
-        echo "$DATA" | jq -r '.[] | "*   **\(.chain)** (`\(.address)`)\n" + (.tokens[] | "    *   **\(.symbol)**: \(.balance)")'
-        ;;
-    *)
-        echo "Error: Unsupported format '$FORMAT'" >&2
-        exit 1
-        ;;
-esac
+now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+echo "$DATA" | jq -r --arg now "$now" '.[] | . as $parent | .tokens[] | [$now, "crypto", "balance", "crypto." + $parent.chain + "." + $parent.address + "." + .symbol, .balance] | @tsv'

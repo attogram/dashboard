@@ -3,12 +3,8 @@
 # modules/github-sponsors
 #
 # GitHub Sponsors module for the dashboard.
-# Fetches sponsor count for the authenticated user.
+# Fetches sponsor count for the authenticated user and outputs it in TSV format.
 #
-# Usage: ./modules/github-sponsors <format>
-#
-
-#echo 'modules/github-sponsors.sh started'
 
 # --- Configuration and Setup ------------------------------------------------
 
@@ -30,14 +26,6 @@ if [ -z "$GITHUB_TOKEN" ];
 then
     # If no token is provided, this module is skipped.
     exit 0
-fi
-
-# --- Input ------------------------------------------------------------------
-
-FORMAT="$1"
-if [ -z "$FORMAT" ]; then
-    echo "Usage: $(basename "$0") <format>" >&2
-    exit 1
 fi
 
 # --- Data Fetching ----------------------------------------------------------
@@ -72,42 +60,5 @@ fi
 
 # --- Output Formatting ------------------------------------------------------
 
-case "$FORMAT" in
-    plain)
-        echo "GitHub Sponsors"
-        echo "Sponsors: $SPONSORS_COUNT"
-        ;;
-    pretty)
-        echo -e "\e[1mGitHub Sponsors\e[0m"
-        echo "Sponsors: $SPONSORS_COUNT"
-        ;;
-    json)
-        echo "\"github-sponsors\":{\"sponsors\":${SPONSORS_COUNT}}"
-        ;;
-    xml)
-        echo "<github_sponsors><sponsors>${SPONSORS_COUNT}</sponsors></github_sponsors>"
-        ;;
-    html)
-        echo "<h2>GitHub Sponsors</h2><ul><li>Sponsors: ${SPONSORS_COUNT}</li></ul>"
-        ;;
-    yaml)
-        echo "github-sponsors:"
-        echo "  sponsors: ${SPONSORS_COUNT}"
-        ;;
-    csv)
-        now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-        printf "%s,github-sponsors,sponsors,github-sponsors,%s\n" "$now" "$SPONSORS_COUNT"
-        ;;
-        tsv)
-            now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            printf "%s\tgithub-sponsors\tsponsors\tgithub-sponsors\t%s\n" "$now" "$SPONSORS_COUNT"
-            ;;
-    markdown)
-        echo "### GitHub Sponsors"
-        echo "- Sponsors: ${SPONSORS_COUNT}"
-        ;;
-    *)
-        echo "Error: Unsupported format '$FORMAT'" >&2
-        exit 1
-        ;;
-esac
+now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+printf "%s\tgithub-sponsors\tsponsors\tgithub-sponsors\t%s\n" "$now" "$SPONSORS_COUNT"

@@ -3,12 +3,8 @@
 # modules/hackernews
 #
 # Hacker News module for the dashboard.
-# Fetches karma for the user specified in config.sh.
+# Fetches karma for the user specified in config.sh and outputs it in TSV format.
 #
-# Usage: ./modules/hackernews <format>
-#
-
-#echo 'modules/hackernews.sh started'
 
 # --- Configuration and Setup ------------------------------------------------
 
@@ -27,16 +23,9 @@ fi
 
 # Check for required configuration
 if [ -z "$HN_USER" ]; then
-    echo "Error: HN_USER is not set in config.sh" >&2
-    exit 1
-fi
-
-# --- Input ------------------------------------------------------------------
-
-FORMAT="$1"
-if [ -z "$FORMAT" ]; then
-    echo "Usage: $(basename "$0") <format>" >&2
-    exit 1
+    # This module is optional if HN_USER is not set.
+    # Exit gracefully without an error.
+    exit 0
 fi
 
 # --- Data Fetching ----------------------------------------------------------
@@ -60,42 +49,5 @@ KARMA=$(echo "$API_RESPONSE" | jq -r '.karma')
 
 # --- Output Formatting ------------------------------------------------------
 
-case "$FORMAT" in
-    plain)
-        echo "Hacker News"
-        echo "Karma: $KARMA"
-        ;;
-    pretty)
-        echo -e "\e[1mHacker News\e[0m"
-        echo "Karma: $KARMA"
-        ;;
-    json)
-        echo "\"hackernews\":{\"karma\":${KARMA}}"
-        ;;
-    xml)
-        echo "<hackernews><karma>${KARMA}</karma></hackernews>"
-        ;;
-    html)
-        echo "<h2>Hacker News</h2><ul><li>Karma: ${KARMA}</li></ul>"
-        ;;
-    yaml)
-        echo "hackernews:"
-        echo "  karma: ${KARMA}"
-        ;;
-    csv)
-        now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-        printf "%s,hackernews,karma,%s,%s\n" "$now" "$HN_USER" "$KARMA"
-        ;;
-        tsv)
-            now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            printf "%s\thackernews\tkarma\t%s\t%s\n" "$now" "$HN_USER" "$KARMA"
-            ;;
-    markdown)
-        echo "### Hacker News"
-        echo "- Karma: ${KARMA}"
-        ;;
-    *)
-        echo "Error: Unsupported format '$FORMAT'" >&2
-        exit 1
-        ;;
-esac
+now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+printf "%s\thackernews\tkarma\t%s\t%s\n" "$now" "$HN_USER" "$KARMA"
