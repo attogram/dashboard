@@ -51,6 +51,18 @@ teardown() {
   echo "$output" | jq -e '.[0] | has("date") and has("module") and has("value")' > /dev/null
 }
 
+@test "bugfix: json output should have correct numeric types" {
+  run ./dashboard.sh -f json
+  [ "$status" -eq 0 ]
+  # Check that a known numeric value is a number, not a string
+  github_stars_value=$(echo "$output" | jq '.[] | select(.module == "github" and .channels == "stars" and .namespace == "repo.attogram.base") | .value')
+  [ "$(jq 'type' <<< "$github_stars_value")" = '"number"' ]
+
+  # Check that a known numeric value from another module is also a number
+  hackernews_karma_value=$(echo "$output" | jq '.[] | select(.module == "hackernews") | .value')
+  [ "$(jq 'type' <<< "$hackernews_karma_value")" = '"number"' ]
+}
+
 @test "integration: xml output should contain root element and metric data" {
   run ./dashboard.sh -f xml
   [ "$status" -eq 0 ]
