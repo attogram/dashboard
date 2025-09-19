@@ -26,14 +26,14 @@ Some reporters accept their own arguments, which you can pass after the reporter
 
 Here is a list of the currently available reporters.
 
-### `timespan`
+### `trending`
 
-The `timespan` reporter shows the change in each metric over a period of time. It reads all the `.tsv` report files from the `reports/` directory and calculates the difference between the first and last recorded values for each metric.
+The `trending` reporter shows the change in each metric over a period of time, but it only includes metrics that have actually changed. It reads all the `.tsv` report files from the `reports/` directory and calculates the difference between the first and last recorded values for each metric, filtering out any that have a change of zero.
 
 **Usage:**
 
 ```bash
-./dashboard.sh -r timespan [days]
+./dashboard.sh -r trending [days]
 ```
 
 - **`[days]`** (optional): The number of days of history to analyze.
@@ -42,8 +42,6 @@ The `timespan` reporter shows the change in each metric over a period of time. I
 
 - If `[days]` is not provided, it will analyze all reports in your `reports/` directory to show the all-time change.
 - If `[days]` is provided, it will show the change over the last `N` days.
-
-**Note on `[days]` filtering:** This feature is currently not working as expected due to limitations in the `date` command of the execution environment. The script is unable to parse dates from the report filenames reliably. At present, the `timespan` reporter will always show the all-time history regardless of this argument.
 
 ### `top-stars`
 
