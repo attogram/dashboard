@@ -260,7 +260,7 @@ else
 
                     if ($5 == "null") {
                         printf "{\"date\":\"%s\",\"module\":\"%s\",\"channels\":\"%s\",\"namespace\":\"%s\",\"value\":null}", $1, $2, $3, $4
-                    } else if ($5 ~ /^[0-9]+$/) {
+                    } else if ($5 != "" && $5 == $5+0) {
                         printf "{\"date\":\"%s\",\"module\":\"%s\",\"channels\":\"%s\",\"namespace\":\"%s\",\"value\":%s}", $1, $2, $3, $4, $5
                     } else {
                         printf "{\"date\":\"%s\",\"module\":\"%s\",\"channels\":\"%s\",\"namespace\":\"%s\",\"value\":\"%s\"}", $1, $2, $3, $4, $5

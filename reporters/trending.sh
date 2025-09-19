@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-# reporters/timespan.sh
+# reporters/trending.sh
 #
-# Shows the change in metrics over a given timespan.
-# Usage: ./dashboard.sh -r timespan [days]
+# Shows the trending metrics over a given timespan.
+# Only shows metrics that have changed.
+# Usage: ./dashboard.sh -r trending [days]
 #
 # If [days] is provided, it shows the change over the last N days.
 # If not, it shows the change over all available history.
@@ -36,9 +37,12 @@ if [ -n "$DAYS_AGO" ]; then
     CUTOFF_DATE=$(date -d "$DAYS_AGO days ago" +%s)
     for file in "${ALL_FILES[@]}"; do
         FILENAME=$(basename "$file" .tsv)
-        # The filename is a timestamp. It can be in various formats.
-        # We normalize it to a format that `date -d` can handle.
-        FILENAME_FOR_DATE=$(echo "$FILENAME" | sed 's/_/T/')
+        # The filename is a timestamp in the format YYYY-MM-DDTHH-MM-SSZ.
+        # We normalize it to 'YYYY-MM-DD HH:MM:SS' so that `date -d` can parse it.
+        DATE_PART=$(echo "$FILENAME" | cut -d'T' -f1)
+        TIME_PART=$(echo "$FILENAME" | cut -d'T' -f2 | sed 's/Z$//')
+        TIME_PART_COLONS=$(echo "$TIME_PART" | tr '-' ':')
+        FILENAME_FOR_DATE="$DATE_PART $TIME_PART_COLONS"
         FILE_DATE=$(date -d "$FILENAME_FOR_DATE" +%s 2>/dev/null)
 
         if [ -z "$FILE_DATE" ]; then
@@ -80,12 +84,14 @@ FNR == 1 { next; } # Skip header row of each file
 END {
     for (metric in last_value) {
         change = last_value[metric] - first_value[metric];
-        # Add a plus sign for positive changes
-        if (change > 0) {
-            change_str = "+" change;
-        } else {
-            change_str = change;
+        if (change != 0) {
+            # Add a plus sign for positive changes
+            if (change > 0) {
+                change_str = "+" change;
+            } else {
+                change_str = change;
+            }
+            print metric, first_value[metric], last_value[metric], change_str;
         }
-        print metric, first_value[metric], last_value[metric], change_str;
     }
 }' "${TARGET_FILES[@]}"

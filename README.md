@@ -108,6 +108,12 @@ To run only a specific module:
 ./dashboard.sh --format html hackernews
 ```
 
+To run a specific reporter:
+
+- **`top-stars`**: Shows the top 10 repositories by stars.
+- **`trending`**: Shows the change in metrics over a given timespan. Only shows metrics that have changed.
+  - Usage: `./dashboard.sh -r trending [days]`
+
 ## Configuration
 
 All configuration is done in the `config/config.sh` file.
