@@ -106,5 +106,5 @@ END {
 (
     echo -e "Change\tLast\tFirst\tmodule\tchannels\tnamespace"
     echo -e "------\t----\t-----\t------\t--------\t---------"
-    sort -k1,1nr
+    sort -k1,1gr
 )

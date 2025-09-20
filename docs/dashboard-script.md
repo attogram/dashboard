@@ -20,6 +20,7 @@ To run a reporter:
 
 - `-f, --format <format>`: (For module runs only) Specify the output format. See [Output Formats](./dashboard-output-formats.md) for a full list of supported formats. If not provided, the default is `tsv`.
 - `-r, --reporter <name>`: Run a specific reporter from the `reporters/` directory. Any subsequent arguments will be passed to the reporter script.
+- `-v, --verbose`: Enable verbose (debug) mode, which prints detailed messages about the script's execution to standard error.
 - `-h, --help`: Display a help message with usage information and exit.
 
 ### Arguments

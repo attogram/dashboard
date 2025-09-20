@@ -52,6 +52,7 @@ usage() {
     echo "  -f, --format <format>    Set the output format for module runs."
     echo "                           Supported formats: ${VALID_FORMATS[*]}"
     echo "  -r, --reporter <name>    Run a specific reporter."
+    echo "  -v, --verbose            Enable verbose (debug) mode."
     echo "  -h, --help               Display this help message."
     echo
     echo "To save a data collection report, redirect the output to a file:"
@@ -68,7 +69,7 @@ usage() {
     echo
     echo "Available reporters:"
     local reporters=()
-    for reporter in "${SCRIPT_DIR}/reporters"/*; do
+    for reporter in "${SCRIPT_DIR}/reporters"/*.sh; do
         if [ -x "$reporter" ]; then
             reporters+=("$(basename "$reporter" .sh)")
         fi
@@ -95,6 +96,10 @@ while [[ $# -gt 0 ]]; do
         -f|--format)
             FORMAT="$2"
             shift 2
+            ;;
+        -v|--verbose)
+            DASHBOARD_DEBUG=1
+            shift
             ;;
         -h|--help)
             usage
