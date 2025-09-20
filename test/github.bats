@@ -14,7 +14,7 @@ EOL
 
 teardown() {
   # This teardown function is run after each test.
-  rm -rf config
+  rm -f config/config.sh
 }
 
 @test "github module produces valid tsv" {
