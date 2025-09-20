@@ -1,6 +1,6 @@
 # The Main Script (`dashboard.sh`)
 
-The `dashboard.sh` script is the main entry point for the application. It serves as an orchestrator, responsible for parsing arguments, loading configuration, and running modules for data collection, or running reporters for data analysis.
+The `dashboard.sh` script is the main entry point for the application. It serves as an orchestrator, responsible for parsing arguments, loading configuration, and running modules for data collection, or running overviews for data analysis.
 
 ## Usage
 
@@ -10,16 +10,17 @@ To collect data from modules:
 ./dashboard.sh [options] [module]
 ```
 
-To run a reporter:
+To run an overview:
 
 ```
-./dashboard.sh -r <reporter_name> [reporter_options]
+./dashboard.sh -o <overview_name> [overview_options]
 ```
 
 ### Options
 
 - `-f, --format <format>`: (For module runs only) Specify the output format. See [Output Formats](./dashboard-output-formats.md) for a full list of supported formats. If not provided, the default is `tsv`.
-- `-r, --reporter <name>`: Run a specific reporter from the `reporters/` directory. Any subsequent arguments will be passed to the reporter script.
+- `-o, --overview <name>`: Run a specific overview from the `overviews/` directory. Any subsequent arguments will be passed to the overview script.
+- `-v, --verbose`: Enable verbose (debug) mode, which prints detailed messages about the script's execution to standard error.
 - `-h, --help`: Display a help message with usage information and exit.
 
 ### Arguments
@@ -32,7 +33,7 @@ The script has two main modes of operation: data collection and reporting.
 
 ### Data Collection Mode
 
-This is the default mode when the `-r` flag is not used.
+This is the default mode when the `-o` flag is not used.
 
 1.  **Argument Parsing**: It parses command-line options (`-f`, `-h`) and an optional module name.
 
@@ -46,10 +47,10 @@ This is the default mode when the `-r` flag is not used.
 
 5.  **Report Generation**: The script collects the output from each executed module. For structured formats like `json`, `xml`, and `html`, it wraps the collected outputs with the appropriate root elements. For simpler formats like `plain` or `csv`, it concatenates the outputs. The final report is printed to standard output, which can be redirected to a file.
 
-### Reporter Mode
+### Overview Mode
 
-This mode is triggered by the `-r` flag.
+This mode is triggered by the `-o` flag.
 
-1.  **Argument Parsing**: The script looks for the `-r` flag. When found, it takes the next argument as the reporter's name. All following arguments are passed directly to the reporter.
+1.  **Argument Parsing**: The script looks for the `-o` flag. When found, it takes the next argument as the overview's name. All following arguments are passed directly to the overview.
 
-2.  **Reporter Execution**: The script looks for an executable file with the given name in the `reporters/` directory and runs it, passing along any reporter-specific arguments. The output of the reporter is printed to standard output.
+2.  **Overview Execution**: The script looks for an executable file with the given name in the `overviews/` directory and runs it, passing along any overview-specific arguments. The output of the overview is printed to standard output.

@@ -41,17 +41,18 @@ _error() {
   printf '[ERROR] %s\n' "$1" >&2
 }
 
-REPORTER_TO_RUN=""
-REPORTER_ARGS=()
+OVERVIEW_TO_RUN=""
+OVERVIEW_ARGS=()
 
 usage() {
     echo "Usage: $(basename "$0") [options] [module]"
-    echo "   or: $(basename "$0") -r <reporter> [reporter_options]"
+    echo "   or: $(basename "$0") -o <overview> [overview_options]"
     echo
     echo "Options:"
     echo "  -f, --format <format>    Set the output format for module runs."
     echo "                           Supported formats: ${VALID_FORMATS[*]}"
-    echo "  -r, --reporter <name>    Run a specific reporter."
+    echo "  -o, --overview <name>    Run a specific overview."
+    echo "  -v, --verbose            Enable verbose (debug) mode."
     echo "  -h, --help               Display this help message."
     echo
     echo "To save a data collection report, redirect the output to a file:"
@@ -66,17 +67,17 @@ usage() {
     done
     echo "  ${modules[*]}"
     echo
-    echo "Available reporters:"
-    local reporters=()
-    for reporter in "${SCRIPT_DIR}/reporters"/*; do
-        if [ -x "$reporter" ]; then
-            reporters+=("$(basename "$reporter" .sh)")
+    echo "Available overviews:"
+    local overviews=()
+    for overview in "${SCRIPT_DIR}/overviews"/*.sh; do
+        if [ -x "$overview" ]; then
+            overviews+=("$(basename "$overview" .sh)")
         fi
     done
-    echo "  ${reporters[*]}"
+    echo "  ${overviews[*]}"
     echo
     echo "If a module name (e.g., 'github') is provided, only that module will be run."
-    echo "If a reporter is specified with -r, it will be run with any subsequent arguments."
+    echo "If an overview is specified with -o, it will be run with any subsequent arguments."
 }
 
 _debug "$DASHBOARD_NAME v$DASHBOARD_VERSION"
@@ -86,15 +87,19 @@ _debug 'parsing command-line arguments'
 while [[ $# -gt 0 ]]; do
     key="$1"
     case $key in
-        -r|--reporter)
-            REPORTER_TO_RUN="$2"
+        -o|--overview)
+            OVERVIEW_TO_RUN="$2"
             shift 2
-            REPORTER_ARGS=("$@")
-            break # Stop parsing, the rest of the args are for the reporter
+            OVERVIEW_ARGS=("$@")
+            break # Stop parsing, the rest of the args are for the overview
             ;;
         -f|--format)
             FORMAT="$2"
             shift 2
+            ;;
+        -v|--verbose)
+            DASHBOARD_DEBUG=1
+            shift
             ;;
         -h|--help)
             usage
@@ -115,27 +120,27 @@ done
 
 # --- Main Execution Flow ----------------------------------------------------
 
-if [ -n "$REPORTER_TO_RUN" ]; then
-    # --- Reporter Execution -------------------------------------------------
-    _debug "Attempting to run reporter: $REPORTER_TO_RUN"
-    REPORTER_PATH="${SCRIPT_DIR}/reporters/${REPORTER_TO_RUN}.sh"
-    if [ ! -f "$REPORTER_PATH" ]; then
+if [ -n "$OVERVIEW_TO_RUN" ]; then
+    # --- Overview Execution -------------------------------------------------
+    _debug "Attempting to run overview: $OVERVIEW_TO_RUN"
+    OVERVIEW_PATH="${SCRIPT_DIR}/overviews/${OVERVIEW_TO_RUN}.sh"
+    if [ ! -f "$OVERVIEW_PATH" ]; then
         # try without .sh extension for convenience
-        REPORTER_PATH="${SCRIPT_DIR}/reporters/${REPORTER_TO_RUN}"
-        if [ ! -f "$REPORTER_PATH" ]; then
-            _error "Error: Reporter '${REPORTER_TO_RUN}' not found."
+        OVERVIEW_PATH="${SCRIPT_DIR}/overviews/${OVERVIEW_TO_RUN}"
+        if [ ! -f "$OVERVIEW_PATH" ]; then
+            _error "Error: Overview '${OVERVIEW_TO_RUN}' not found."
             exit 1
         fi
     fi
 
-    if [ ! -x "$REPORTER_PATH" ]; then
-        _error "Error: Reporter '${REPORTER_TO_RUN}' is not executable."
+    if [ ! -x "$OVERVIEW_PATH" ]; then
+        _error "Error: Overview '${OVERVIEW_TO_RUN}' is not executable."
         exit 1
     fi
 
-    _debug "Executing reporter '$REPORTER_PATH' with args: ${REPORTER_ARGS[*]}"
+    _debug "Executing overview '$OVERVIEW_PATH' with args: ${OVERVIEW_ARGS[*]}"
     # shellcheck source=/dev/null
-    "$REPORTER_PATH" "${REPORTER_ARGS[@]}"
+    "$OVERVIEW_PATH" "${OVERVIEW_ARGS[@]}"
 
 else
     # --- Module Data Collection ---------------------------------------------
@@ -169,6 +174,9 @@ else
     fi
 
     generate_report() {
+        if [ ${#OUTPUTS[@]} -eq 0 ]; then
+            return
+        fi
         # The OUTPUTS array contains TSV data from the modules.
         # We now format it based on the user's requested FORMAT.
 
@@ -344,7 +352,11 @@ else
         fi
     done
 
-    generate_report
+    if [ ${#OUTPUTS[@]} -eq 0 ]; then
+        echo "No data collected. Use --verbose for more details."
+    else
+        generate_report
+    fi
 fi
 
 _debug 'Done.'

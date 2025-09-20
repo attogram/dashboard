@@ -55,6 +55,7 @@ teardown() {
             CRYPTO_WALLET_BTC="test_btc_address" \
             bash modules/crypto.sh
     [ "$status" -eq 0 ]
+    echo "Blockcypher Output: $output"
     [[ "$output" =~ .*${tab}crypto${tab}balance${tab}crypto.BTC.test_btc_address.BTC${tab}0.12345678$ ]]
 }
 
@@ -64,6 +65,7 @@ teardown() {
             CRYPTO_WALLET_ETH="test_eth_address" \
             bash modules/crypto.sh
     [ "$status" -eq 0 ]
+    echo "Covalent Output: $output"
     [[ "$output" =~ .*${tab}crypto${tab}balance${tab}crypto.ETH.test_eth_address.ETH${tab}1.234$ ]]
 }
 
