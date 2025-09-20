@@ -69,13 +69,16 @@ awk '
 BEGIN {
     FS="\t";
     OFS="\t";
-    print "Metric\tFirst Value\tLast Value\tChange";
-    print "------\t-----------\t----------\t------";
+    print "Change\tLast Value\tFirst Value\tMetrics";
+    print "------\t----------\t-----------\t-------";
 }
 FNR == 1 { next; } # Skip header row of each file
 {
     metric = $2 OFS $3 OFS $4; # module, channel, namespace
     value = $5;
+    if (value == "null") {
+        value = 0;
+    }
     if (!(metric in first_value)) {
         first_value[metric] = value;
     }
@@ -83,6 +86,13 @@ FNR == 1 { next; } # Skip header row of each file
 }
 END {
     for (metric in last_value) {
+        # Safeguard for nulls in old reports
+        if (first_value[metric] == "null") {
+            first_value[metric] = 0;
+        }
+        if (last_value[metric] == "null") {
+            last_value[metric] = 0;
+        }
         change = last_value[metric] - first_value[metric];
         if (change != 0) {
             # Add a plus sign for positive changes
@@ -91,7 +101,7 @@ END {
             } else {
                 change_str = change;
             }
-            print metric, first_value[metric], last_value[metric], change_str;
+            print change_str, last_value[metric], first_value[metric], metric;
         }
     }
 }' "${TARGET_FILES[@]}"

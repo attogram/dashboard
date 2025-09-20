@@ -36,6 +36,19 @@ fi
 
 # --- Data Fetching and Formatting -------------------------------------------
 
+# Helper function to safely get a value from jq
+get_json_value() {
+    local json=$1
+    local key=$2
+    local value
+    value=$(echo "$json" | jq -r "$key")
+    if [ "$value" == "null" ] || [ -z "$value" ]; then
+        echo "0"
+    else
+        echo "$value"
+    fi
+}
+
 fetch_repo_data() {
     local repo_name=$1
     local api_url="https://api.github.com/repos/${GITHUB_USER}/${repo_name}"
@@ -67,15 +80,20 @@ fetch_repo_data() {
     local open_prs
     local closed_prs
 
-    stars=$(echo "$api_response" | jq -r '.stargazers_count')
-    forks=$(echo "$api_response" | jq -r '.forks_count')
-    issues=$(echo "$api_response" | jq -r '.open_issues_count')
-    watchers=$(echo "$api_response" | jq -r '.subscribers_count')
+    stars=$(get_json_value "$api_response" '.stargazers_count')
+    forks=$(get_json_value "$api_response" '.forks_count')
+    issues=$(get_json_value "$api_response" '.open_issues_count')
+    watchers=$(get_json_value "$api_response" '.subscribers_count')
 
     # Fetch PR counts using the search API to be more efficient
     local search_api_url="https://api.github.com/search/issues?q=is:pr+repo:${GITHUB_USER}/${repo_name}"
-    open_prs=$(curl -s "${curl_headers[@]}" "${search_api_url}+is:open" | jq -r '.total_count')
-    closed_prs=$(curl -s "${curl_headers[@]}" "${search_api_url}+is:closed" | jq -r '.total_count')
+    local open_prs_response
+    local closed_prs_response
+    open_prs_response=$(curl -s "${curl_headers[@]}" "${search_api_url}+is:open")
+    closed_prs_response=$(curl -s "${curl_headers[@]}" "${search_api_url}+is:closed")
+
+    open_prs=$(get_json_value "$open_prs_response" '.total_count')
+    closed_prs=$(get_json_value "$closed_prs_response" '.total_count')
 
     local now
     now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
