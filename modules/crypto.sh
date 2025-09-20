@@ -57,10 +57,17 @@ get_provider() {
 # --- Provider Implementations ---
 
 fetch_from_local_btc() {
-    if ! command -v bitcoin-cli &> /dev/null; then return 1; fi
-    local btc_info wallet_name balance display_name
+    if ! command -v bitcoin-cli &> /dev/null; then
+        echo "[ERROR] bitcoin-cli not found. Please install Bitcoin Core and ensure bitcoin-cli is in your PATH." >&2
+        return 1
+    fi
+    local btc_info
     btc_info=$(bitcoin-cli getwalletinfo 2>/dev/null)
-    if [ $? -ne 0 ]; then return 1; fi
+    if [ $? -ne 0 ]; then
+        echo "[ERROR] bitcoin-cli command failed. Please ensure your Bitcoin node is running and configured correctly." >&2
+        return 1
+    fi
+    local wallet_name balance display_name
     wallet_name=$(echo "$btc_info" | jq -r '.walletname')
     balance=$(echo "$btc_info" | jq -r '.balance')
     display_name="local node ($wallet_name)"

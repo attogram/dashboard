@@ -174,6 +174,9 @@ else
     fi
 
     generate_report() {
+        if [ ${#OUTPUTS[@]} -eq 0 ]; then
+            return
+        fi
         # The OUTPUTS array contains TSV data from the modules.
         # We now format it based on the user's requested FORMAT.
 
@@ -349,7 +352,11 @@ else
         fi
     done
 
-    generate_report
+    if [ ${#OUTPUTS[@]} -eq 0 ]; then
+        echo "No data collected. Use --verbose for more details."
+    else
+        generate_report
+    fi
 fi
 
 _debug 'Done.'

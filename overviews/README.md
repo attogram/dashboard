@@ -6,8 +6,8 @@ This directory contains scripts that analyze the historical data collected by th
 
 Here is a list of the currently available overviews:
 
-*   **`trending`**: Shows the change in each metric over a period of time.
-*   **`top-stars`**: Lists the top repositories by their star count from the most recent report.
+- **`trending`**: Shows the change in each metric over a period of time.
+- **`top-stars`**: Lists the top repositories by their star count from the most recent report.
 
 ## Creating Your Own Overview
 

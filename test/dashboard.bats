@@ -33,9 +33,9 @@ teardown() {
 @test "dashboard.sh --help should show usage" {
   run ./dashboard.sh --help
   echo "$output" | grep -q "Usage: dashboard.sh \[options\] \[module\]"
-  echo "$output" | grep -q -- "-r, --reporter <name>"
+  echo "$output" | grep -q -- "-o, --overview <name>"
   echo "$output" | grep -q "Available modules:"
-  echo "$output" | grep -q "Available reporters:"
+  echo "$output" | grep -q "Available overviews:"
 }
 
 # --- Integration Tests for Centralized Output Formatting ---
