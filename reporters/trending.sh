@@ -64,13 +64,11 @@ if [ ${#TARGET_FILES[@]} -eq 0 ]; then
     exit 0
 fi
 
-# Use awk to process the tsv files
+# Use awk to process the tsv files, then sort the results
 awk '
 BEGIN {
     FS="\t";
     OFS="\t";
-    print "Change\tLast Value\tFirst Value\tMetrics";
-    print "------\t----------\t-----------\t-------";
 }
 FNR == 1 { next; } # Skip header row of each file
 {
@@ -104,4 +102,9 @@ END {
             print change_str, last_value[metric], first_value[metric], metric;
         }
     }
-}' "${TARGET_FILES[@]}"
+}' "${TARGET_FILES[@]}" |
+(
+    echo -e "Change\tLast\tFirst\tmodule\tchannels\tnamespace"
+    echo -e "------\t----\t-----\t------\t--------\t---------"
+    sort -k1,1nr
+)

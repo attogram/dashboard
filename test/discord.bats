@@ -23,7 +23,7 @@ EOF
 
 teardown() {
   # This teardown function is run after each test.
-  rm -rf config
+  rm -f config/config.sh
   rm -rf "/tmp/bats_mocks_$$"
 }
 
