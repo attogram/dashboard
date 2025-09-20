@@ -43,6 +43,18 @@ The `trending` reporter shows the change in each metric over a period of time, b
 - If `[days]` is not provided, it will analyze all reports in your `reports/` directory to show the all-time change.
 - If `[days]` is provided, it will show the change over the last `N` days.
 
+**Example Output:**
+
+```
+Change	Last Value	First Value	Metrics
+------	----------	-----------	-------
+-1	0	1	github	open_issues	repo.attogram.agents
+-15	0	15	github	closed_prs	repo.attogram.ote
+-1	0	1	github	open_prs	repo.attogram.agents
+-13	0	13	github	closed_prs	repo.attogram.justrefs
++6	10	4	github	stars	repo.attogram.llm-council
+```
+
 ### `top-stars`
 
 The `top-stars` reporter finds the most recent report file and lists the top repositories by their star count.
