@@ -17,7 +17,7 @@ DASHBOARD_URL='https://github.com/attogram/dashboard'
 DASHBOARD_DISCORD='https://discord.gg/BGQJCbYVBa'
 DASHBOARD_LICENSE='MIT'
 DASHBOARD_COPYRIGHT='Copyright (c) 2025 Attogram Project <https://github.com/attogram>'
-DASHBOARD_DEBUG=0 # 0 = off, 1 = on
+export DASHBOARD_DEBUG=0 # 0 = off, 1 = on
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FORMAT="tsv"
@@ -345,7 +345,11 @@ else
     OUTPUTS=()
     for module_name in "${MODULES_TO_RUN[@]}"; do
         _debug "Calling $module_name"
-        module_output=$("$MODULES_DIR/$module_name" "$MODULE_EXEC_FORMAT" 2>/dev/null)
+        if (( DASHBOARD_DEBUG )); then
+            module_output=$("$MODULES_DIR/$module_name" "$MODULE_EXEC_FORMAT")
+        else
+            module_output=$("$MODULES_DIR/$module_name" "$MODULE_EXEC_FORMAT" 2>/dev/null)
+        fi
         if [ -n "$module_output" ]; then
             _debug "Saving output from $module_name: $(echo "$module_output" | wc -c | tr -d ' ') bytes"
             OUTPUTS+=("$module_output")
