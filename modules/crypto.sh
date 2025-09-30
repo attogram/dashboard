@@ -12,6 +12,17 @@ if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
 fi
 
+# --- Debugging ---
+# Check if DASHBOARD_DEBUG is set and non-zero
+if [[ -n "${DASHBOARD_DEBUG:-}" ]] && ((DASHBOARD_DEBUG)); then
+    set -x
+fi
+
+_debug() {
+    if ! ((((DASHBOARD_DEBUG)))); then return 0; fi
+    printf '[DEBUG] %s: %s\n' "$(date '+%H:%M:%S')" "$1" >&2
+}
+
 # --- Data Fetching ---
 
 # Function to format a raw balance string using its decimals value.
@@ -57,19 +68,26 @@ get_provider() {
 # --- Provider Implementations ---
 
 fetch_from_local_btc() {
+    _debug "Running fetch_from_local_btc"
     if ! command -v bitcoin-cli &> /dev/null; then
         echo "[ERROR] bitcoin-cli not found. Please install Bitcoin Core and ensure bitcoin-cli is in your PATH." >&2
         return 1
     fi
     local btc_info
     btc_info=$(bitcoin-cli getwalletinfo 2>/dev/null)
-    if [ $? -ne 0 ]; then
+    local exit_code=$?
+    _debug "bitcoin-cli exit code: ${exit_code}"
+    _debug "btc_info: ${btc_info}"
+
+    if [ ${exit_code} -ne 0 ]; then
         echo "[ERROR] bitcoin-cli command failed. Please ensure your Bitcoin node is running and configured correctly." >&2
         return 1
     fi
     local wallet_name balance display_name
     wallet_name=$(echo "$btc_info" | jq -r '.walletname')
     balance=$(echo "$btc_info" | jq -r '.balance')
+    _debug "wallet_name: ${wallet_name}"
+    _debug "balance: ${balance}"
     display_name="local node ($wallet_name)"
     echo "{\"chain\":\"BTC\",\"address\":\"${display_name}\",\"tokens\":[{\"symbol\":\"BTC\",\"balance\":\"${balance}\"}]}"
 }
@@ -149,7 +167,9 @@ while IFS= read -r line; do
     case "$PROVIDER" in
         local)
             if [ "$TICKER" = "BTC" ]; then
-                wallet_json=$(fetch_from_local_btc)
+                if ! wallet_json=$(fetch_from_local_btc); then
+                    exit 1
+                fi
             fi
             ;;
         blockcypher)
